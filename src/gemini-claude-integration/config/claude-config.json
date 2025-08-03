@@ -1,0 +1,6 @@
+{
+  "model": "claude-sonnet-4-20250514",
+  "max_tokens": 3000,
+  "rate_limit_delay": 2.0,
+  "enable_cost_tracking": true
+}
