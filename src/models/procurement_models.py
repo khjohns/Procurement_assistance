@@ -1,19 +1,25 @@
 from pydantic import BaseModel, Field
 import uuid
+from enum import Enum
 
-class AnskaffelseRequest(BaseModel):
+class TriageColor(str, Enum):
+    GREEN = "GRØNN"
+    YELLOW = "GUL"
+    RED = "RØD"
+
+class ProcurementRequest(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    navn: str
-    verdi: int
-    beskrivelse: str | None = None # Lagt til for protokoll-generering
-    potensiell_leverandoer: str | None = None # Lagt til for protokoll-generering
+    name: str
+    value: int
+    description: str | None = None
+    potential_supplier: str | None = None
 
 class TriageResult(BaseModel):
-    farge: str
-    begrunnelse: str
+    color: TriageColor
+    reasoning: str
     confidence: float = Field(..., ge=0.0, le=1.0)
 
 class ProtocolResult(BaseModel):
-    """Representerer resultatet fra ProtocolGenerator."""
-    protocol_text: str
+    """Represents the result from the ProtocolGenerator."""
+    content: str
     confidence: float = Field(..., ge=0.0, le=1.0)

@@ -1,0 +1,47 @@
+# pyproject.toml
+[tool.pytest.ini_options]
+minversion = "6.0"
+testpaths = ["tests"]
+pythonpath = ["."]  # Dette er viktig - setter prosjekt-root som Python path
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+asyncio_mode = "auto"
+addopts = [
+    "-v",
+    "--tb=short",
+    "--strict-markers",
+    "-p", "no:anyio",  # Deaktiver anyio plugin
+]
+markers = [
+    "asyncio: marks tests as asyncio tests",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+]
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "anskaffelsesassistenten"
+version = "0.1.0"
+description = "AI-drevet anskaffelsesassistent for Oslo Kommune"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.100.0",
+    "uvicorn[standard]>=0.23.0",
+    "pydantic>=2.0.0",
+    "structlog>=23.1.0",
+    "httpx>=0.24.0",
+    "asyncpg>=0.28.0",
+    "python-dotenv>=1.0.0",
+    "google-generativeai>=0.3.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.1.0",
+]
