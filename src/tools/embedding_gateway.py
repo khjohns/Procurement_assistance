@@ -8,14 +8,14 @@ logger = structlog.get_logger()
 class EmbeddingGateway:
     def __init__(self, api_key: str):
         genai.configure(api_key=api_key)
-        self.embedding_model_name = "models/text-embedding-004"
+        self.embedding_model_name = "gemini-embedding-001"
         logger.info(f"EmbeddingGateway initialized with model: {self.embedding_model_name}")
 
     async def create_embedding(
         self, 
         text: str, 
         task_type: str = "RETRIEVAL_DOCUMENT",
-        output_dimensionality: int = 768
+        output_dimensionality: int = 1536
     ) -> List[float]:
         """Genererer en embedding for en gitt tekst med spesifikk task_type."""
         logger.info(
@@ -40,7 +40,7 @@ class EmbeddingGateway:
         self, 
         texts: List[str], 
         task_type: str = "RETRIEVAL_DOCUMENT",
-        output_dimensionality: int = 768
+        output_dimensionality: int = 1536
     ) -> List[List[float]]:
         """Genererer embeddings for en liste med tekster ved å bruke riktig batch-metode."""
         logger.info(

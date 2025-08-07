@@ -12,8 +12,12 @@ from src.tools.rpc_gateway_client import RPCGatewayClient
 from src.tools.enhanced_llm_gateway import LLMGateway  # NY import
 from src.agent_library.registry import TOOL_REGISTRY, create_agent_from_registry
 
+from src.tools.embedding_gateway import EmbeddingGateway
+import os
+
 # Import alle agenter
 import src.specialists.triage_agent
+import src.specialists.oslomodell_agent
 
 logger = structlog.get_logger()
 
@@ -83,8 +87,9 @@ class ReasoningOrchestrator:
         
         self.dependency_container = {
             "llm_gateway": self.llm_gateway,
-            # Legg til andre dependencies etter behov
-        }
+            "embedding_gateway": 
+            EmbeddingGateway(api_key=os.getenv("GEMINI_API_KEY"))
+            }
         
         logger.info("ReasoningOrchestrator initialized", 
                    agent_id=agent_id,
