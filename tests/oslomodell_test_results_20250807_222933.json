@@ -1,0 +1,312 @@
+{
+  "timestamp": "20250807_222933",
+  "summary": {
+    "total": 7,
+    "passed": 1,
+    "failed": 6
+  },
+  "results": [
+    {
+      "case": "Små kontorrekvisita",
+      "passed": true,
+      "details": {},
+      "errors": [],
+      "result": {
+        "vurdert_risiko_for_akrim": "lav",
+        "påkrevde_seriøsitetskrav": [
+          "A",
+          "B",
+          "C",
+          "D",
+          "E"
+        ],
+        "anbefalt_antall_underleverandørledd": 2,
+        "aktsomhetsvurdering_kravsett": "Ikke påkrevd",
+        "krav_om_lærlinger": {
+          "status": false,
+          "begrunnelse": "Verdien (250 000 NOK) er under den statlige terskelverdien (1.3 MNOK), og anskaffelsen gjelder varer, ikke et utførende fagområde med behov for læreplasser.",
+          "antall_lærlinger": 0
+        },
+        "recommendations": [
+          "Anskaffelsen er en vareanskaffelse og faller utenfor virkeområdet til Oslomodellens seriøsitetskrav A-V, som gjelder for bygge-, anleggs- og tjenesteanskaffelser.",
+          "Kravsett for aktsomhetsvurderinger (A/B) er ikke påkrevd da verdien er under 500 000 NOK.",
+          "Selv om ingen spesifikke krav er pålagt, skal det iht. pkt. 7.1 foretas en generell vurdering av risiko i leverandørkjeden. For kontorrekvisita kan det være risiko knyttet til produksjonsforhold (menneskerettigheter, miljø)."
+        ],
+        "confidence": 0.95
+      }
+    },
+    {
+      "case": "Bygge barnehage lav verdi",
+      "passed": false,
+      "details": {},
+      "errors": [
+        "Feil risiko: høy (forventet lav)",
+        "Ekstra krav: ['F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T']",
+        "Feil underleverandørledd: 1 (forventet 2)"
+      ],
+      "result": {
+        "vurdert_risiko_for_akrim": "høy",
+        "påkrevde_seriøsitetskrav": [
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "F",
+          "G",
+          "H",
+          "I",
+          "J",
+          "K",
+          "L",
+          "M",
+          "N",
+          "O",
+          "P",
+          "Q",
+          "R",
+          "S",
+          "T"
+        ],
+        "anbefalt_antall_underleverandørledd": 1,
+        "aktsomhetsvurdering_kravsett": "Ikke påkrevd",
+        "krav_om_lærlinger": {
+          "status": false,
+          "begrunnelse": "Kontraktsverdien (450 000 NOK) er under terskelverdien på 1.3 MNOK, og varigheten (3 måneder) er ikke 'over tre måneder'. Begge vilkår må være oppfylt.",
+          "antall_lærlinger": 0
+        },
+        "recommendations": [
+          "Byggebransjen har generelt høy risiko for arbeidslivskriminalitet. Det er derfor avgjørende å følge opp de påkrevde seriøsitetskravene (A-T) nøye i kontraktsperioden.",
+          "Begrensningen på maksimalt ett ledd underleverandører må tydelig fremgå av konkurransegrunnlaget og kontrakten, og følges opp.",
+          "Selv om ikke påkrevd, bør det vurderes å gjennomføre en forenklet risikovurdering av leverandørkjeden grunnet den høye bransjerisikoen."
+        ],
+        "confidence": 0.95
+      }
+    },
+    {
+      "case": "Renhold kommune",
+      "passed": false,
+      "details": {},
+      "errors": [
+        "Feil risiko: høy (forventet moderat)"
+      ],
+      "result": {
+        "vurdert_risiko_for_akrim": "høy",
+        "påkrevde_seriøsitetskrav": [
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "F",
+          "G",
+          "H",
+          "I",
+          "J",
+          "K",
+          "L",
+          "M",
+          "N",
+          "O",
+          "P",
+          "Q",
+          "R",
+          "S",
+          "T",
+          "U"
+        ],
+        "anbefalt_antall_underleverandørledd": 1,
+        "aktsomhetsvurdering_kravsett": "A/B",
+        "krav_om_lærlinger": {
+          "status": false,
+          "begrunnelse": "Kontraktsverdien (800 000 NOK) er under terskelverdien på 1.3 MNOK for lærlingekrav. Renhold er heller ikke definert som et fagområde med særlig behov for læreplasser.",
+          "antall_lærlinger": 0
+        },
+        "recommendations": [
+          "Renholdsbransjen er en høyrisikobransje. Tett kontraktoppfølging er avgjørende for å sikre etterlevelse av seriøsitetskravene (A-U).",
+          "Gitt den høye risikoen, bør det vurderes å forby bruk av underleverandører (0 ledd), jf. instruksens punkt 5.1 b).",
+          "Dersom forenklet kravsett B for aktsomhetsvurderinger benyttes, må vurderingen for dette dokumenteres i kontraktsstrategien, jf. instruksens punkt 7.5."
+        ],
+        "confidence": 1.0
+      }
+    },
+    {
+      "case": "Stor byggeentreprise",
+      "passed": false,
+      "details": {},
+      "errors": [
+        "Ekstra krav: ['V']"
+      ],
+      "result": {
+        "vurdert_risiko_for_akrim": "høy",
+        "påkrevde_seriøsitetskrav": [
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "F",
+          "G",
+          "H",
+          "I",
+          "J",
+          "K",
+          "L",
+          "M",
+          "N",
+          "O",
+          "P",
+          "Q",
+          "R",
+          "S",
+          "T",
+          "U",
+          "V"
+        ],
+        "anbefalt_antall_underleverandørledd": 1,
+        "aktsomhetsvurdering_kravsett": "A",
+        "krav_om_lærlinger": {
+          "status": true,
+          "begrunnelse": "Kontrakten overstiger statlig terskelverdi på 1.3M NOK, har en varighet på over 3 måneder, og omfatter fagområder med særlig behov for læreplasser (jf. Oslomodellen pkt. 6 og instruks [oslo-003]).",
+          "antall_lærlinger": 0
+        },
+        "recommendations": [
+          "Dette er en byggeanskaffelse over 500 000 NOK, og krav A-U skal derfor benyttes (jf. Oslomodellen pkt. 4.2).",
+          "Risikoen for arbeidslivskriminalitet vurderes som høy. Det anbefales å begrense underleverandørkjeden til maksimalt ett ledd (jf. Oslomodellen pkt. 5.1 a). Streng kontroll av underleverandør må følges opp i kontraktsperioden.",
+          "Krav om lærlinger (Krav V) er påkrevd. Antall eller prosentandel lærlinger må spesifiseres i konkurransegrunnlaget.",
+          "Siden anskaffelsen er over 500 000 NOK og har høy risiko, skal kravsett A for aktsomhetsvurderinger benyttes (jf. instruks [oslo-002] pkt. 7.3)."
+        ],
+        "confidence": 0.98
+      }
+    },
+    {
+      "case": "IT-konsulenter",
+      "passed": false,
+      "details": {},
+      "errors": [
+        "Feil risiko: moderat (forventet lav)",
+        "Ekstra krav: ['I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'V']",
+        "Feil underleverandørledd: 1 (forventet 2)",
+        "Feil lærlingkrav: True (forventet False)"
+      ],
+      "result": {
+        "vurdert_risiko_for_akrim": "moderat",
+        "påkrevde_seriøsitetskrav": [
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "F",
+          "G",
+          "H",
+          "I",
+          "J",
+          "K",
+          "L",
+          "M",
+          "N",
+          "O",
+          "P",
+          "Q",
+          "R",
+          "S",
+          "T",
+          "V"
+        ],
+        "anbefalt_antall_underleverandørledd": 1,
+        "aktsomhetsvurdering_kravsett": "A",
+        "krav_om_lærlinger": {
+          "status": true,
+          "begrunnelse": "Anskaffelsens verdi (2.5M NOK) er over statlig terskelverdi (1.3M NOK), varigheten (24 mnd) er over 3 måneder, og IT-utvikling er et fagområde med behov for læreplasser.",
+          "antall_lærlinger": 0
+        },
+        "recommendations": [
+          "Siden risikoen for akrim vurderes som moderat, skal krav I-T benyttes i tillegg til A-H, jf. instruks 4.3.",
+          "Basert på moderat risiko anbefales maksimalt ett ledd underleverandører, jf. instruks 5.1 a).",
+          "Krav om lærlinger (Krav V) er påkrevd. Antall lærlinger må spesifiseres i konkurransegrunnlaget.",
+          "Det er vurdert høy risiko for brudd på grunnleggende rettigheter i leverandørkjeden for IT-tjenester. Kravsett A for aktsomhetsvurderinger skal derfor benyttes, jf. instruks 7.3."
+        ],
+        "confidence": 0.95
+      }
+    },
+    {
+      "case": "Vaktmestertjenester",
+      "passed": false,
+      "details": {},
+      "errors": [
+        "Feil risiko: høy (forventet moderat)",
+        "Mangler krav: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T']",
+        "Ekstra krav: ['Krav A-T']"
+      ],
+      "result": {
+        "vurdert_risiko_for_akrim": "høy",
+        "påkrevde_seriøsitetskrav": [
+          "Krav A-T"
+        ],
+        "anbefalt_antall_underleverandørledd": 1,
+        "aktsomhetsvurdering_kravsett": "A",
+        "krav_om_lærlinger": {
+          "status": false,
+          "begrunnelse": "Anskaffelsen er over terskelverdi (1.5M > 1.3M) og varighet (36 > 3 mnd), men 'vaktmestertjenester' er ikke et av de spesifikt listede fagområdene med særlig behov for læreplasser i henhold til instruks [oslo-003].",
+          "antall_lærlinger": 0
+        },
+        "recommendations": [
+          "Gitt den høye risikoen for arbeidslivskriminalitet, bør det gjennomføres utvidet leverandør- og kontraktskontroll.",
+          "Spesifiser i konkurransegrunnlaget hvilke typer oppgaver vaktmestertjenesten omfatter for å avklare om noen av dem faller inn under fagområder med krav om lærlinger (f.eks. mindre vedlikeholdsoppgaver innen elektro eller rør).",
+          "Vurder å nekte bruk av underleverandører (0 ledd) for å maksimere kontroll, i henhold til instruks [oslo-001] punkt 5.1.b, dersom en detaljert risikovurdering tilsier at dette er nødvendig."
+        ],
+        "confidence": 0.95
+      }
+    },
+    {
+      "case": "Anleggsarbeid vei",
+      "passed": false,
+      "details": {},
+      "errors": [
+        "Ekstra krav: ['V']",
+        "Feil underleverandørledd: 0 (forventet 1)"
+      ],
+      "result": {
+        "vurdert_risiko_for_akrim": "høy",
+        "påkrevde_seriøsitetskrav": [
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "F",
+          "G",
+          "H",
+          "I",
+          "J",
+          "K",
+          "L",
+          "M",
+          "N",
+          "O",
+          "P",
+          "Q",
+          "R",
+          "S",
+          "T",
+          "U",
+          "V"
+        ],
+        "anbefalt_antall_underleverandørledd": 0,
+        "aktsomhetsvurdering_kravsett": "A",
+        "krav_om_lærlinger": {
+          "status": true,
+          "begrunnelse": "Anskaffelsens verdi (12M NOK) er over terskelverdien på 1.3M NOK, varigheten (6 mnd) er over 3 måneder, og den er innenfor 'Anleggsfaget' som er et prioritert fagområde.",
+          "antall_lærlinger": 0
+        },
+        "recommendations": [
+          "Anleggsbransjen har høy risiko for arbeidslivskriminalitet. Det anbefales å nekte bruk av underleverandører (0 ledd) i henhold til instruksens punkt 5.1.b.",
+          "Krav V om lærlinger er utløst. Det konkrete antallet eller prosentandelen lærlinger må spesifiseres i konkurransegrunnlaget.",
+          "Benytt kravsett A for aktsomhetsvurderinger for å identifisere og håndtere den høye risikoen for brudd på menneskerettigheter og arbeidstakerrettigheter i leverandørkjeden."
+        ],
+        "confidence": 1.0
+      }
+    }
+  ]
+}

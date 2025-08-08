@@ -1,1 +1,11 @@
 pytest
+fastapi
+uvicorn[standard]
+asyncpg
+python-dotenv
+structlog
+pydantic
+httpx
+google-generativeai
+pandas
+psycopg2-binary
