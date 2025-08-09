@@ -46,19 +46,19 @@ class TriageColor(str, Enum):
 class RequirementSource(str, Enum):
     """Kilden til et krav."""
     OSLOMODELLEN = "oslomodellen"
-    MILJOKRAV = "miljøkrav"
+    MILJOKRAV = "miljokrav"
     ANSKAFFELSESFORSKRIFT = "anskaffelsesforskrift"
     OTHER = "annet"
 
 class RequirementCategory(str, Enum):
     """Kategori for krav."""
-    SERIOSITET = "seriøsitet"
-    AKTSOMHET = "aktsomhet"
-    LARLINGER = "lærlinger"
-    MILJO = "miljø"
-    KLIMA = "klima"
+    INTEGRITY_REQUIREMENTS = "seriøsitet"
+    DUE_DILIGENCE = "aktsomhet"
+    APPRENTICES = "lærlinger"
+    ENVIRONMENT = "miljo"
+    CLIMATE = "klima"
     TRANSPORT = "transport"
-    DOKUMENTASJON = "dokumentasjon"
+    DOCUMENTATION = "dokumentasjon"
     OTHER = "annet"
 
 # ========================================
@@ -178,7 +178,7 @@ class BaseAssessmentResult(BaseModel):
 # OSLOMODELL-SPESIFIKKE MODELLER
 # ========================================
 
-class ApprenticshipRequirement(BaseModel):
+class ApprenticeshipRequirement(BaseModel):
     """Strukturert modell for lærlingkrav."""
     required: bool = Field(..., description="Om lærlinger er påkrevd")
     reason: str = Field(..., description="Begrunnelse for kravet")
@@ -193,8 +193,9 @@ class OslomodellAssessmentResult(BaseAssessmentResult):
     assessed_by: str = Field(default="oslomodell_agent")
     
     # Risikovurdering
-    risk_assessment_akrim: str = Field(..., description="Risiko for arbeidslivskriminalitet: høy/moderat/lav")
-    risk_assessment_social_dumping: str = Field(..., description="Risiko for sosial dumping: høy/moderat/lav")
+    crime_risk_assessment: str = Field(..., description="Risiko for arbeidslivskriminalitet: høy/moderat/lav")
+    dd_risk_assessment: str = Field(..., description="Menneskerettighetsrisiko: høy/moderat/lav")
+    social_dumping_risk: str = Field(..., description="Risiko for sosial dumping: høy/moderat/lav")
     
     # Krav med full metadata
     required_requirements: List[Requirement] = Field(
@@ -206,7 +207,7 @@ class OslomodellAssessmentResult(BaseAssessmentResult):
     subcontractor_levels: int = Field(..., ge=0, le=2, description="Maks antall underleverandørledd")
     subcontractor_justification: str = Field(..., description="Begrunnelse for antall ledd")
     
-    apprenticeship_requirement: ApprenticshipRequirement = Field(..., description="Strukturert lærlingkrav")
+    apprenticeship_requirement: ApprenticeshipRequirement = Field(..., description="Strukturert lærlingkrav")
     
     due_diligence_requirement: Optional[str] = Field(None, description="Aktsomhetsvurdering kravsett: A/B/Ikke påkrevd")
     
@@ -233,11 +234,11 @@ class TransportRequirement(BaseModel):
     deadline: Optional[str] = Field(None, description="Frist for implementering")
     incentive_applicable: bool = Field(..., description="Om insentiver gjelder")
 
-class MiljokravAssessmentResult(BaseAssessmentResult):
+class EnvironmentalAssessmentResult(BaseAssessmentResult):
     """
     Resultat fra Miljøkrav-vurdering med strukturerte miljødata.
     """
-    assessed_by: str = Field(default="miljokrav_agent")
+    assessed_by: str = Field(default="environmental_agent")
     
     # Overordnet miljøvurdering
     environmental_risk: EnvironmentalRiskLevel = Field(..., description="Samlet miljørisiko")
@@ -342,7 +343,7 @@ class ComprehensiveAssessment(BaseModel):
     procurement_request: ProcurementRequest
     
     oslomodell_result: Optional[OslomodellAssessmentResult] = None
-    miljokrav_result: Optional[MiljokravAssessmentResult] = None
+    miljokrav_result: Optional[EnvironmentalAssessmentResult] = None
     triage_result: Optional[TriageResult] = None
     protocol_result: Optional[ProtocolResult] = None
     

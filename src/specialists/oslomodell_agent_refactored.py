@@ -20,7 +20,7 @@ from src.models.procurement_models_refactored import (
     Requirement,
     RequirementSource,
     RequirementCategory,
-    ApprenticshipRequirement
+    ApprenticeshipRequirement
 )
 from src.tools.rpc_gateway_client import RPCGatewayClient
 
@@ -119,7 +119,7 @@ class OslomodellAgent(BaseSpecialistAgent):
         
         logger.info("Oslomodell assessment completed",
                    procurement_id=assessment.procurement_id,
-                   risk=assessment.risk_assessment_akrim,
+                   risk=assessment.crime_risk_assessment,
                    requirement_codes=[req.code for req in assessment.required_requirements],
                    apprentices_required=assessment.apprenticeship_requirement.required)
         
@@ -290,8 +290,9 @@ class OslomodellAgent(BaseSpecialistAgent):
         IKKE generer detaljerte beskrivelser - det kommer fra kontraktsdokumenter.
         
         Inkluder også:
-        - risk_assessment_akrim: "høy"/"moderat"/"lav"
-        - risk_assessment_social_dumping: "høy"/"moderat"/"lav"  
+        - crime_risk_assessment: "høy"/"moderat"/"lav"
+        - dd_risk_assessment: "høy"/"moderat"/"lav"           # NYE! Human rights due diligence
+        - social_dumping_risk: "høy"/"moderat"/"lav"
         - subcontractor_levels: 0-2 basert på risiko
         - apprenticeship_requirement: Strukturert objekt
         - due_diligence_requirement: "A"/"B"/"Ikke påkrevd"

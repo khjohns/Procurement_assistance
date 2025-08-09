@@ -13,9 +13,9 @@ import structlog
 
 logger = structlog.get_logger()
 
-class OslomodellDocumentGenerator:
+class OsloModelDocumentGenerator:
     """
-    Genererer strukturerte dokumenter basert på Oslomodell-vurderinger.
+    Generates structured documents based on Oslo Model assessments.
     Produserer markdown-filer med komplett oversikt over krav og anbefalinger.
     """
     
@@ -130,7 +130,7 @@ class OslomodellDocumentGenerator:
         ])
         
         # Seksjon 2: Risikovurdering
-        risk_level = assessment.get('vurdert_risiko_for_akrim', 'ikke vurdert')
+        risk_level = assessment.get('crime_risk_assessment', 'ikke vurdert')
         risk_emoji = {"høy": "🔴", "moderat": "🟡", "lav": "🟢"}.get(risk_level, "⚪")
         
         lines.extend([
@@ -308,7 +308,7 @@ class OslomodellDocumentGenerator:
             
             name = proc.get('name', 'Ukjent')[:30]
             value = f"{proc.get('value', 0):,}"
-            risk = assess.get('vurdert_risiko_for_akrim', 'N/A')
+            risk = assess.get('crime_risk_assessment', 'N/A')
             krav_count = len(assess.get('påkrevde_seriøsitetskrav', []))
             underlev = assess.get('anbefalt_antall_underleverandørledd', 'N/A')
             lærling = "Ja" if assess.get('krav_om_lærlinger', {}).get('status') else "Nei"
@@ -322,16 +322,16 @@ class OslomodellDocumentGenerator:
 async def generate_from_orchestration(orchestration_context: Dict[str, Any], 
                                      output_dir: str = "generated_documents") -> str:
     """
-    Genererer dokument direkte fra orchestrator context.
+    Generates document directly from orchestrator context.
     
     Args:
-        orchestration_context: Context fra ReasoningOrchestrator
+        orchestration_context: Context from ReasoningOrchestrator
         output_dir: Output directory
         
     Returns:
         Filepath to generated document
     """
-    generator = OslomodellDocumentGenerator(output_dir)
+    generator = OsloModelDocumentGenerator(output_dir)
     
     # Ekstraher data fra context
     procurement_data = None

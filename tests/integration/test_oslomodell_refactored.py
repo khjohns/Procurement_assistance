@@ -106,8 +106,9 @@ async def test_refactored_agent():
         
         # 2. Risk assessments
         print(f"\n⚠️ RISK ASSESSMENTS:")
-        print(f"  A-krim Risk: {result.risk_assessment_akrim}")
-        print(f"  Social Dumping Risk: {result.risk_assessment_social_dumping}")
+        print(f"  A-krim Risk: {result.crime_risk_assessment}")
+        print(f"  DD Risk: {result.dd_risk_assessment}")
+        print(f"  Social Dumping Risk: {result.social_dumping_risk}")
         print(f"  Subcontractor Levels: {result.subcontractor_levels}")
         print(f"  Justification: {result.subcontractor_justification}")
         
@@ -200,8 +201,9 @@ async def test_model_serialization():
         procurement_id="test-123",
         procurement_name="Test Procurement",
         confidence=0.95,
-        risk_assessment_akrim="moderat",
-        risk_assessment_social_dumping="lav",
+        crime_risk_assessment="moderat",
+        dd_risk_assessment="moderat",
+        social_dumping_risk="lav",
         required_requirements=[
             Requirement(
                 code="A",
@@ -209,7 +211,7 @@ async def test_model_serialization():
                 description="A test requirement description",
                 mandatory=True,
                 source=RequirementSource.OSLOMODELLEN,
-                category=RequirementCategory.SERIOSITET
+                category=RequirementCategory.INTEGRITY_REQUIREMENTS
             )
         ],
         subcontractor_levels=1,
