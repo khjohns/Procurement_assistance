@@ -15,7 +15,8 @@ def register_tool(
     name: str, 
     service_type: str, 
     metadata: Dict[str, Any], 
-    dependencies: Optional[List[str]] = None
+    dependencies: Optional[List[str]] = None,
+    save_method: Optional[str] = None
 ):
     """
     Decorator that automatically registers an agent or tool with dependency injection support.
@@ -24,14 +25,16 @@ def register_tool(
         name: Method name for RPC calls (e.g., "agent.run_triage")
         service_type: "specialist_agent" or "automated_tool"
         metadata: Description, input/output schemas, etc.
-        dependencies: List of required dependencies (e.g., ["gemini_gateway", "supabase_gateway"])
+        dependencies: List of required dependencies (e.g., ["llm_gateway"])
+        save_method: The corresponding database method to save the agent's result.
     
     Example:
         @register_tool(
             name="agent.run_triage",
             service_type="specialist_agent",
             metadata={"description": "Triage assessment"},
-            dependencies=["gemini_gateway"]
+            dependencies=["llm_gateway"],
+            save_method="database.save_triage_result"
         )
         class TriageAgent(BaseSpecialistAgent):
             ...
@@ -42,20 +45,23 @@ def register_tool(
             "service_type": service_type,
             "metadata": metadata,
             "method_name": name,
-            "dependencies": dependencies or ["gemini_gateway"]  # Default dependency
+            "dependencies": dependencies or ["llm_gateway"],  # Default dependency
+            "save_method": save_method
         }
         
         # Add metadata to the class for introspection
         cls._tool_name = name
         cls._service_type = service_type
         cls._metadata = metadata
-        cls._dependencies = dependencies or ["gemini_gateway"]
-        
+        cls._dependencies = dependencies or ["llm_gateway"]
+        cls._save_method = save_method
+
         logger.info("Tool registered", 
                    name=name, 
                    service_type=service_type, 
                    class_name=cls.__name__, 
-                   dependencies=dependencies)
+                   dependencies=dependencies,
+                   save_method=save_method)
         return cls
     
     return decorator

@@ -122,3 +122,6 @@ dmypy.json
 
 # Temporary files
 _midl/\n# Ignore .DS_Store files\n*.DS_Store
+
+# macOS
+.DS_Store

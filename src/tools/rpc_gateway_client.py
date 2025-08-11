@@ -70,9 +70,13 @@ class RPCGatewayClient:
     async def save_triage_result(self, procurement_id: str, triage_result: TriageResult) -> Dict[str, Any]:
         params = {
             "procurementId": procurement_id,
-            "color": triage_result.color.value, # Use enum value
+            "color": triage_result.color.value,  # Use enum value
             "reasoning": triage_result.reasoning,
-            "confidence": triage_result.confidence
+            "confidence": triage_result.confidence,
+            "riskFactors": triage_result.risk_factors,
+            "mitigationMeasures": triage_result.mitigation_measures,
+            "requiresSpecialAttention": triage_result.requires_special_attention,
+            "escalationRecommended": triage_result.escalation_recommended
         }
         return await self.call("database.save_triage_result", params)
 

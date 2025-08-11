@@ -80,6 +80,7 @@ async def sync_gateway_catalog():
             print(f"    Class: {tool_info['class'].__name__}")
             print(f"    Type: {tool_info['service_type']}")
             print(f"    Dependencies: {tool_info['dependencies']}")
+            print(f"    Save method: {tool_info['save_method']}")
         
         await conn.close()
         return True

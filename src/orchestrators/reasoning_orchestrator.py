@@ -337,14 +337,14 @@ Svar med JSON:
         return "\n".join(formatted_tools)
     
 
-    async def _execute_action(self, gateway: RPCGatewayClient, 
-                             action: Action, 
+    async def _execute_action(self, gateway: RPCGatewayClient,
+                             action: Action,
                              context: ExecutionContext) -> Dict[str, Any]:
         """Execute a planned action."""
-        logger.info("Executing action", 
+        logger.info("Executing action",
                    method=action.method,
                    has_params=bool(action.parameters))
-        
+
         try:
             if action.method.startswith("database."):
                 if action.method == 'database.save_triage_result':
@@ -352,39 +352,39 @@ Svar med JSON:
                     triage_result_data = context.current_state.get("triage_result")
                     if not triage_result_data:
                         raise ValueError("Triage result not found in state, cannot save.")
-                    
+
                     # Bygg de korrekte parameterne basert på Pydantic-modellen
                     params = {
                         "procurementId": context.current_state.get("procurementId"),
-                        "resultId": triage_result_data.get("procurement_id"), # Eller en annen unik ID
                         "color": triage_result_data.get("color"),
                         "reasoning": triage_result_data.get("reasoning"),
-                        "confidence": triage_result_data.get("confidence")
-                        # Legg til andre felter som backenden din forventer
+                        "confidence": triage_result_data.get("confidence"),
+                        "riskFactors": triage_result_data.get("risk_factors"),
+                        "mitigationMeasures": triage_result_data.get("mitigation_measures"),
+                        "requiresSpecialAttention": triage_result_data.get("requires_special_attention"),
+                        "escalationRecommended": triage_result_data.get("escalation_recommended")
                     }
                     result = await gateway.call(action.method, params)
                 else:
                     # Standard databasekall for alle andre metoder
                     result = await gateway.call(action.method, action.parameters)
-                # Direct database RPC call
-                result = await gateway.call(action.method, action.parameters)
-                
+
             elif action.method.startswith("agent."):
                 # Specialist agent call via SDK
                 result = await self._call_specialist_agent(action.method, action.parameters)
-                
+
             else:
                 raise ValueError(f"Unknown method type: {action.method}")
-            
+
             # Log to history
             context.add_execution(action, {"status": "success", "result": result})
             return {"status": "success", "result": result}
-            
+
         except Exception as e:
-            logger.error("Action execution failed", 
+            logger.error("Action execution failed",
                         method=action.method,
                         error=str(e))
-            
+
             error_result = {"status": "error", "message": str(e)}
             context.add_execution(action, error_result)
             return error_result
@@ -485,14 +485,21 @@ Svar med JSON:
         if not history:
             return "No actions performed yet."
         
+        # ENDRING: Vis kun de 3 siste handlingene, og kun de viktigste feltene
+        summary_limit = 3 
         summary = []
-        for i, entry in enumerate(history[-5:]):  # Last 5 actions
-            action = entry["action"]
-            result = entry["result"]
-            status = "✓" if result.get("status") == "success" else "✗"
-            summary.append(f"{i+1}. {status} {action['method']}: {action['reasoning']}")
+        for entry in history[-summary_limit:]:
+            action = entry.get("action", {})
+            result = entry.get("result", {})
+            status = "SUCCESS" if result.get("status") == "success" else "ERROR"
+            
+            # Inkluder kun det aller viktigste for å spare plass
+            summary.append(f"- {action.get('method')} -> {status}")
+
+        if len(history) > summary_limit:
+            return f"Summary of the last {summary_limit} of {len(history)} actions:\n" + "\n".join(summary)
         
-        return "\n".join(summary)
+        return "Executed Actions:\n" + "\n".join(summary)
     
     async def _log_orchestration(self, context: ExecutionContext):
         """Log orchestration to database."""

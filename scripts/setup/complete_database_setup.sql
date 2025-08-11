@@ -1,7 +1,7 @@
 -- complete_database_setup.sql
 -- CONSOLIDATED database setup for entire Procurement Assistant system
--- Includes: Core tables, Oslomodell, Miljokrav, Gateway services, ACL, and new assessment tables
--- Run this for a complete, fresh setup
+-- Includes: Core tables, Oslomodell, Miljokrav, Gateway services, ACL, and assessment tables
+-- Run this for a complete, fresh setup with full reasoning_orchestrator access
 
 -- ========================================
 -- STEP 1: CLEAN UP (DROP EVERYTHING)
@@ -31,6 +31,7 @@ DROP FUNCTION IF EXISTS get_assessment_by_procurement(jsonb) CASCADE;
 -- Drop core functions
 DROP FUNCTION IF EXISTS create_procurement(jsonb) CASCADE;
 DROP FUNCTION IF EXISTS save_triage_result(jsonb) CASCADE;
+DROP FUNCTION IF EXISTS save_triage(jsonb) CASCADE; -- Alias for compatibility
 DROP FUNCTION IF EXISTS set_procurement_status(jsonb) CASCADE;
 DROP FUNCTION IF EXISTS save_protocol(jsonb) CASCADE;
 DROP FUNCTION IF EXISTS log_execution(jsonb) CASCADE;
@@ -59,9 +60,9 @@ CREATE TABLE procurements (
     name TEXT NOT NULL,
     value INTEGER NOT NULL,
     description TEXT,
-    category TEXT, -- New field for category
-    duration_months INTEGER, -- New field for duration
-    includes_construction BOOLEAN DEFAULT FALSE, -- New field
+    category TEXT,
+    duration_months INTEGER,
+    includes_construction BOOLEAN DEFAULT FALSE,
     status TEXT DEFAULT 'PENDING',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -69,12 +70,20 @@ CREATE TABLE procurements (
 
 CREATE TABLE triage_results (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    procurement_id UUID UNIQUE NOT NULL REFERENCES procurements(id) ON DELETE CASCADE,
+    procurement_id UUID NOT NULL REFERENCES procurements(id) ON DELETE CASCADE,
+    -- ENDRING: Bytter til norske verdier for å matche Pydantic-modellene
     color TEXT NOT NULL CHECK (color IN ('GRØNN', 'GUL', 'RØD')),
     reasoning TEXT NOT NULL,
     confidence FLOAT NOT NULL CHECK (confidence >= 0 AND confidence <= 1),
+    risk_factors JSONB DEFAULT '[]'::jsonb,
+    mitigation_measures JSONB DEFAULT '[]'::jsonb,
+    requires_special_attention BOOLEAN DEFAULT FALSE,
+    escalation_recommended BOOLEAN DEFAULT FALSE,
+    assessed_by TEXT DEFAULT 'triage_agent',
+    assessment_date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(procurement_id)
 );
 
 CREATE TABLE protocols (
@@ -82,89 +91,112 @@ CREATE TABLE protocols (
     procurement_id UUID NOT NULL REFERENCES procurements(id) ON DELETE CASCADE,
     content TEXT NOT NULL,
     confidence FLOAT NOT NULL CHECK (confidence >= 0 AND confidence <= 1),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 CREATE TABLE executions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    session_id UUID NOT NULL,
+    session_id TEXT NOT NULL,
     action JSONB NOT NULL,
     result JSONB,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- ========================================
--- STEP 4: CREATE GATEWAY MANAGEMENT TABLES
--- ========================================
-
-CREATE TABLE gateway_service_catalog (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    service_name TEXT NOT NULL,
-    service_type TEXT NOT NULL DEFAULT 'postgres_rpc',
-    function_key TEXT NOT NULL,
-    sql_function_name TEXT NOT NULL,
-    function_metadata JSONB DEFAULT '{}',
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    UNIQUE(service_name, function_key)
-);
-
-CREATE TABLE gateway_acl_config (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    agent_id TEXT NOT NULL,
-    allowed_method TEXT NOT NULL,
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    UNIQUE(agent_id, allowed_method)
-);
-
--- ========================================
--- STEP 5: CREATE ASSESSMENT TABLES (NEW)
+-- STEP 4: CREATE ASSESSMENT TABLES
 -- ========================================
 
 CREATE TABLE environmental_assessments (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     procurement_id UUID NOT NULL REFERENCES procurements(id) ON DELETE CASCADE,
-    assessed_by TEXT NOT NULL DEFAULT 'environmental_agent',
-    environmental_risk TEXT NOT NULL CHECK (environmental_risk IN ('lav', 'middels', 'høy')),
-    climate_impact_assessed BOOLEAN DEFAULT TRUE,
-    transport_requirements JSONB DEFAULT '[]',
-    exceptions_recommended JSONB DEFAULT '[]',
-    minimum_biofuel_required BOOLEAN DEFAULT FALSE,
-    important_deadlines JSONB DEFAULT '{}',
-    documentation_requirements TEXT[],
-    follow_up_points TEXT[],
-    market_dialogue_recommended BOOLEAN DEFAULT FALSE,
-    award_criteria_recommended TEXT[],
-    recommendations TEXT[],
+    procurement_name TEXT NOT NULL,
+    
+    -- Core assessment fields
     confidence FLOAT NOT NULL CHECK (confidence >= 0 AND confidence <= 1),
+    assessed_by TEXT DEFAULT 'environmental_agent',
     assessment_date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    context_documents_used TEXT[],
+    
+    -- Environmental specific fields
+    environmental_risk TEXT CHECK (environmental_risk IN ('lav', 'middels', 'høy')),
+    climate_impact_assessed BOOLEAN DEFAULT TRUE,
+    
+    -- Requirements as JSONB arrays
+    applied_requirements JSONB DEFAULT '[]'::jsonb,
+    transport_requirements JSONB DEFAULT '[]'::jsonb,
+    exceptions_recommended JSONB DEFAULT '[]'::jsonb,
+    
+    -- Flags and booleans
+    minimum_biofuel_required BOOLEAN DEFAULT FALSE,
+    market_dialogue_recommended BOOLEAN DEFAULT FALSE,
+    
+    -- Structured data as JSONB
+    important_deadlines JSONB DEFAULT '{}'::jsonb,
+    documentation_requirements JSONB DEFAULT '[]'::jsonb,
+    follow_up_points JSONB DEFAULT '[]'::jsonb,
+    award_criteria_recommended JSONB DEFAULT '[]'::jsonb,
+    
+    -- Common assessment fields
+    recommendations JSONB DEFAULT '[]'::jsonb,
+    warnings JSONB DEFAULT '[]'::jsonb,
+    information_gaps JSONB DEFAULT '[]'::jsonb,
+    context_documents_used JSONB DEFAULT '[]'::jsonb,
+    confidence_factors JSONB DEFAULT '{}'::jsonb,
+    
+    -- Full assessment data backup
+    assessment_data JSONB NOT NULL,
+    
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    UNIQUE(procurement_id, assessed_by)
+    UNIQUE(procurement_id)
 );
 
 CREATE TABLE oslomodell_assessments (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     procurement_id UUID NOT NULL REFERENCES procurements(id) ON DELETE CASCADE,
-    assessed_by TEXT NOT NULL DEFAULT 'oslomodell_agent',
-    applicable_requirements JSONB DEFAULT '[]',
-    threshold_requirements JSONB DEFAULT '[]',
-    recommendation TEXT NOT NULL,
+    procurement_name TEXT NOT NULL,
+    
+    -- Core assessment fields
     confidence FLOAT NOT NULL CHECK (confidence >= 0 AND confidence <= 1),
+    assessed_by TEXT DEFAULT 'oslomodell_agent',
     assessment_date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    context_documents_used TEXT[],
+    
+    -- Risk assessments
+    crime_risk_assessment TEXT CHECK (crime_risk_assessment IN ('høy', 'moderat', 'lav')),
+    dd_risk_assessment TEXT CHECK (dd_risk_assessment IN ('høy', 'moderat', 'lav')),
+    social_dumping_risk TEXT CHECK (social_dumping_risk IN ('høy', 'moderat', 'lav')),
+    
+    -- Subcontractor info
+    subcontractor_levels INTEGER CHECK (subcontractor_levels >= 0 AND subcontractor_levels <= 2),
+    subcontractor_justification TEXT,
+    
+    -- Requirements as JSONB
+    required_requirements JSONB DEFAULT '[]'::jsonb,
+    apprenticeship_requirement JSONB DEFAULT '{}'::jsonb,
+    
+    -- Due diligence
+    due_diligence_requirement TEXT CHECK (due_diligence_requirement IN ('A', 'B', 'Ikke påkrevd')),
+    
+    -- Oslo specific metadata
+    applicable_instruction_points JSONB DEFAULT '[]'::jsonb,
+    identified_risk_areas JSONB DEFAULT '[]'::jsonb,
+    
+    -- Common assessment fields
+    recommendations JSONB DEFAULT '[]'::jsonb,
+    warnings JSONB DEFAULT '[]'::jsonb,
+    information_gaps JSONB DEFAULT '[]'::jsonb,
+    context_documents_used JSONB DEFAULT '[]'::jsonb,
+    confidence_factors JSONB DEFAULT '{}'::jsonb,
+    
+    -- Full assessment data backup
+    assessment_data JSONB NOT NULL,
+    
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    UNIQUE(procurement_id, assessed_by)
+    UNIQUE(procurement_id)
 );
 
 -- ========================================
--- STEP 6: CREATE OSLOMODELL KNOWLEDGE TABLES
+-- STEP 5: CREATE KNOWLEDGE TABLES
 -- ========================================
 
 CREATE TABLE oslomodell_knowledge (
@@ -172,71 +204,71 @@ CREATE TABLE oslomodell_knowledge (
     document_id TEXT UNIQUE NOT NULL,
     content TEXT NOT NULL,
     embedding vector(1536),
-    metadata JSONB DEFAULT '{}',
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    metadata JSONB DEFAULT '{}'::jsonb,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
-
--- Create index for vector similarity search
-CREATE INDEX oslomodell_knowledge_embedding_idx 
-ON oslomodell_knowledge 
-USING ivfflat (embedding vector_cosine_ops)
-WITH (lists = 100);
-
--- Create index for metadata queries
-CREATE INDEX oslomodell_knowledge_metadata_idx 
-ON oslomodell_knowledge 
-USING gin (metadata);
-
--- ========================================
--- STEP 7: CREATE MILJOKRAV KNOWLEDGE TABLES
--- ========================================
 
 CREATE TABLE miljokrav_knowledge (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     document_id TEXT UNIQUE NOT NULL,
     content TEXT NOT NULL,
     embedding vector(1536),
-    metadata JSONB DEFAULT '{}',
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    metadata JSONB DEFAULT '{}'::jsonb,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create index for vector similarity search
-CREATE INDEX miljokrav_knowledge_embedding_idx 
-ON miljokrav_knowledge 
-USING ivfflat (embedding vector_cosine_ops)
-WITH (lists = 100);
-
--- Create index for metadata queries
-CREATE INDEX miljokrav_knowledge_metadata_idx 
-ON miljokrav_knowledge 
-USING gin (metadata);
+-- Create indexes for vector similarity search
+CREATE INDEX idx_oslomodell_embedding ON oslomodell_knowledge USING ivfflat (embedding vector_cosine_ops);
+CREATE INDEX idx_miljokrav_embedding ON miljokrav_knowledge USING ivfflat (embedding vector_cosine_ops);
 
 -- ========================================
--- STEP 8: CREATE CORE RPC FUNCTIONS
+-- STEP 6: CREATE GATEWAY CONFIGURATION TABLES
 -- ========================================
 
--- Function to create procurement
-CREATE OR REPLACE FUNCTION create_procurement(params jsonb)
-RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER AS $$
+CREATE TABLE gateway_service_catalog (
+    service_name TEXT NOT NULL,
+    service_type TEXT NOT NULL,
+    function_key TEXT NOT NULL,
+    sql_function_name TEXT NOT NULL,
+    function_metadata JSONB DEFAULT '{}'::jsonb,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    PRIMARY KEY (service_name, function_key)
+);
+
+CREATE TABLE gateway_acl_config (
+    agent_id TEXT NOT NULL,
+    allowed_method TEXT NOT NULL,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    PRIMARY KEY (agent_id, allowed_method)
+);
+
+-- ========================================
+-- STEP 7: CREATE CORE FUNCTIONS
+-- ========================================
+
+-- Create procurement
+CREATE OR REPLACE FUNCTION create_procurement(input_data jsonb)
+RETURNS jsonb
+LANGUAGE plpgsql AS $
 DECLARE
-    v_procurement_id UUID;
+    v_id UUID;
 BEGIN
     INSERT INTO procurements (name, value, description, category, duration_months, includes_construction)
     VALUES (
-        params->>'name',
-        (params->>'value')::integer,
-        params->>'description',
-        params->>'category',
-        (params->>'duration_months')::integer,
-        COALESCE((params->>'includes_construction')::boolean, FALSE)
+        input_data->>'name',
+        (input_data->>'value')::INTEGER,
+        input_data->>'description',
+        input_data->>'category',
+        (input_data->>'duration_months')::INTEGER,
+        COALESCE((input_data->>'includes_construction')::BOOLEAN, FALSE)
     )
-    RETURNING id INTO v_procurement_id;
+    RETURNING id INTO v_id;
     
     RETURN jsonb_build_object(
         'status', 'success',
-        'procurementId', v_procurement_id
+        'procurementId', v_id
     );
 EXCEPTION WHEN OTHERS THEN
     RETURN jsonb_build_object(
@@ -244,31 +276,56 @@ EXCEPTION WHEN OTHERS THEN
         'message', SQLERRM
     );
 END;
-$$;
+$;
 
--- Function to save triage result
-CREATE OR REPLACE FUNCTION save_triage_result(params jsonb)
-RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER AS $$
+-- Save triage result with extended fields
+CREATE OR REPLACE FUNCTION save_triage_result(input_data jsonb)
+RETURNS jsonb
+LANGUAGE plpgsql AS $
 DECLARE
-    v_triage_id UUID;
+    v_id UUID;
 BEGIN
-    INSERT INTO triage_results (procurement_id, color, reasoning, confidence)
+    INSERT INTO triage_results (
+        procurement_id, 
+        color, 
+        reasoning, 
+        confidence,
+        risk_factors,
+        mitigation_measures,
+        requires_special_attention,
+        escalation_recommended,
+        assessed_by,
+        assessment_date
+    )
     VALUES (
-        (params->>'procurementId')::uuid,
-        params->>'color',
-        params->>'reasoning',
-        (params->>'confidence')::float
+        (input_data->>'procurementId')::UUID,
+        input_data->>'color',
+        input_data->>'reasoning',
+        (input_data->>'confidence')::FLOAT,
+        COALESCE(input_data->'riskFactors', '[]'::jsonb),
+        COALESCE(input_data->'mitigationMeasures', '[]'::jsonb),
+        COALESCE((input_data->>'requiresSpecialAttention')::BOOLEAN, FALSE),
+        COALESCE((input_data->>'escalationRecommended')::BOOLEAN, FALSE),
+        COALESCE(input_data->>'assessedBy', 'triage_agent'),
+        COALESCE((input_data->>'assessmentDate')::TIMESTAMPTZ, NOW())
     )
     ON CONFLICT (procurement_id) DO UPDATE SET
         color = EXCLUDED.color,
         reasoning = EXCLUDED.reasoning,
         confidence = EXCLUDED.confidence,
+        risk_factors = EXCLUDED.risk_factors,
+        mitigation_measures = EXCLUDED.mitigation_measures,
+        requires_special_attention = EXCLUDED.requires_special_attention,
+        escalation_recommended = EXCLUDED.escalation_recommended,
+        assessed_by = EXCLUDED.assessed_by,
+        assessment_date = EXCLUDED.assessment_date,
         updated_at = NOW()
-    RETURNING id INTO v_triage_id;
+    RETURNING id INTO v_id;
     
     RETURN jsonb_build_object(
         'status', 'success',
-        'triageId', v_triage_id
+        'message', 'Triage result saved',
+        'triageId', v_id
     );
 EXCEPTION WHEN OTHERS THEN
     RETURN jsonb_build_object(
@@ -276,19 +333,33 @@ EXCEPTION WHEN OTHERS THEN
         'message', SQLERRM
     );
 END;
-$$;
+$;
 
--- Function to set procurement status
-CREATE OR REPLACE FUNCTION set_procurement_status(params jsonb)
-RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER AS $$
+-- Create alias for save_triage pointing to save_triage_result
+-- This ensures compatibility with both naming conventions
+CREATE OR REPLACE FUNCTION save_triage(input_data jsonb)
+RETURNS jsonb
+LANGUAGE plpgsql AS $
+BEGIN
+    -- Simply call save_triage_result with the same parameters
+    RETURN save_triage_result(input_data);
+END;
+$;
+
+-- Set procurement status
+CREATE OR REPLACE FUNCTION set_procurement_status(input_data jsonb)
+RETURNS jsonb
+LANGUAGE plpgsql AS $$
 BEGIN
     UPDATE procurements
-    SET 
-        status = params->>'status',
+    SET status = input_data->>'status',
         updated_at = NOW()
-    WHERE id = (params->>'procurementId')::uuid;
+    WHERE id = (input_data->>'procurementId')::UUID;
     
-    RETURN jsonb_build_object('status', 'success');
+    RETURN jsonb_build_object(
+        'status', 'success',
+        'message', 'Status updated'
+    );
 EXCEPTION WHEN OTHERS THEN
     RETURN jsonb_build_object(
         'status', 'error',
@@ -297,23 +368,24 @@ EXCEPTION WHEN OTHERS THEN
 END;
 $$;
 
--- Function to save protocol
-CREATE OR REPLACE FUNCTION save_protocol(params jsonb)
-RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER AS $$
+-- Save protocol
+CREATE OR REPLACE FUNCTION save_protocol(input_data jsonb)
+RETURNS jsonb
+LANGUAGE plpgsql AS $$
 DECLARE
-    v_protocol_id UUID;
+    v_id UUID;
 BEGIN
     INSERT INTO protocols (procurement_id, content, confidence)
     VALUES (
-        (params->>'procurementId')::uuid,
-        params->>'content',
-        (params->>'confidence')::float
+        (input_data->>'procurementId')::UUID,
+        input_data->>'content',
+        (input_data->>'confidence')::FLOAT
     )
-    RETURNING id INTO v_protocol_id;
+    RETURNING id INTO v_id;
     
     RETURN jsonb_build_object(
         'status', 'success',
-        'protocolId', v_protocol_id
+        'protocolId', v_id
     );
 EXCEPTION WHEN OTHERS THEN
     RETURN jsonb_build_object(
@@ -323,23 +395,24 @@ EXCEPTION WHEN OTHERS THEN
 END;
 $$;
 
--- Function to log execution
-CREATE OR REPLACE FUNCTION log_execution(params jsonb)
-RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER AS $$
+-- Log execution
+CREATE OR REPLACE FUNCTION log_execution(input_data jsonb)
+RETURNS jsonb
+LANGUAGE plpgsql AS $$
 DECLARE
-    v_execution_id UUID;
+    v_id UUID;
 BEGIN
     INSERT INTO executions (session_id, action, result)
     VALUES (
-        (params->>'sessionId')::uuid,
-        params->'action',
-        params->'result'
+        input_data->>'sessionId',
+        input_data->'action',
+        input_data->'result'
     )
-    RETURNING id INTO v_execution_id;
+    RETURNING id INTO v_id;
     
     RETURN jsonb_build_object(
         'status', 'success',
-        'executionId', v_execution_id
+        'executionId', v_id
     );
 EXCEPTION WHEN OTHERS THEN
     RETURN jsonb_build_object(
@@ -350,69 +423,97 @@ END;
 $$;
 
 -- ========================================
--- STEP 9: CREATE ASSESSMENT RPC FUNCTIONS (NEW)
+-- STEP 8: CREATE ASSESSMENT FUNCTIONS
 -- ========================================
 
--- Function to save environmental assessment
-CREATE OR REPLACE FUNCTION save_environmental_assessment(params jsonb)
-RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER AS $$
+-- Save environmental assessment with rich data
+CREATE OR REPLACE FUNCTION save_environmental_assessment(input_data jsonb)
+RETURNS jsonb
+LANGUAGE plpgsql AS $
 DECLARE
-    v_assessment_id UUID;
+    v_id UUID;
+    v_assessment_data JSONB;
 BEGIN
+    -- Build complete assessment data from input
+    v_assessment_data := input_data->'assessmentData';
+    
     INSERT INTO environmental_assessments (
         procurement_id,
+        procurement_name,
+        confidence,
         assessed_by,
+        assessment_date,
         environmental_risk,
         climate_impact_assessed,
+        applied_requirements,
         transport_requirements,
         exceptions_recommended,
         minimum_biofuel_required,
+        market_dialogue_recommended,
         important_deadlines,
         documentation_requirements,
         follow_up_points,
-        market_dialogue_recommended,
         award_criteria_recommended,
         recommendations,
-        confidence,
-        context_documents_used
+        warnings,
+        information_gaps,
+        context_documents_used,
+        confidence_factors,
+        assessment_data
     )
     VALUES (
-        (params->>'procurement_id')::uuid,
-        COALESCE(params->>'assessed_by', 'environmental_agent'),
-        params->>'environmental_risk',
-        COALESCE((params->>'climate_impact_assessed')::boolean, TRUE),
-        COALESCE(params->'transport_requirements', '[]'::jsonb),
-        COALESCE(params->'exceptions_recommended', '[]'::jsonb),
-        COALESCE((params->>'minimum_biofuel_required')::boolean, FALSE),
-        COALESCE(params->'important_deadlines', '{}'::jsonb),
-        ARRAY(SELECT jsonb_array_elements_text(params->'documentation_requirements')),
-        ARRAY(SELECT jsonb_array_elements_text(params->'follow_up_points')),
-        COALESCE((params->>'market_dialogue_recommended')::boolean, FALSE),
-        ARRAY(SELECT jsonb_array_elements_text(params->'award_criteria_recommended')),
-        ARRAY(SELECT jsonb_array_elements_text(params->'recommendations')),
-        (params->>'confidence')::float,
-        ARRAY(SELECT jsonb_array_elements_text(params->'context_documents_used'))
+        (input_data->>'procurementId')::UUID,
+        COALESCE(v_assessment_data->>'procurement_name', input_data->>'procurementName', ''),
+        COALESCE((v_assessment_data->>'confidence')::FLOAT, 0.5),
+        COALESCE(v_assessment_data->>'assessed_by', 'environmental_agent'),
+        COALESCE((v_assessment_data->>'assessment_date')::TIMESTAMPTZ, NOW()),
+        v_assessment_data->>'environmental_risk',
+        COALESCE((v_assessment_data->>'climate_impact_assessed')::BOOLEAN, TRUE),
+        COALESCE(v_assessment_data->'applied_requirements', '[]'::jsonb),
+        COALESCE(v_assessment_data->'transport_requirements', '[]'::jsonb),
+        COALESCE(v_assessment_data->'exceptions_recommended', '[]'::jsonb),
+        COALESCE((v_assessment_data->>'minimum_biofuel_required')::BOOLEAN, FALSE),
+        COALESCE((v_assessment_data->>'market_dialogue_recommended')::BOOLEAN, FALSE),
+        COALESCE(v_assessment_data->'important_deadlines', '{}'::jsonb),
+        COALESCE(v_assessment_data->'documentation_requirements', '[]'::jsonb),
+        COALESCE(v_assessment_data->'follow_up_points', '[]'::jsonb),
+        COALESCE(v_assessment_data->'award_criteria_recommended', '[]'::jsonb),
+        COALESCE(v_assessment_data->'recommendations', '[]'::jsonb),
+        COALESCE(v_assessment_data->'warnings', '[]'::jsonb),
+        COALESCE(v_assessment_data->'information_gaps', '[]'::jsonb),
+        COALESCE(v_assessment_data->'context_documents_used', '[]'::jsonb),
+        COALESCE(v_assessment_data->'confidence_factors', '{}'::jsonb),
+        v_assessment_data
     )
-    ON CONFLICT (procurement_id, assessed_by) DO UPDATE SET
+    ON CONFLICT (procurement_id) DO UPDATE SET
+        procurement_name = EXCLUDED.procurement_name,
+        confidence = EXCLUDED.confidence,
+        assessed_by = EXCLUDED.assessed_by,
+        assessment_date = EXCLUDED.assessment_date,
         environmental_risk = EXCLUDED.environmental_risk,
         climate_impact_assessed = EXCLUDED.climate_impact_assessed,
+        applied_requirements = EXCLUDED.applied_requirements,
         transport_requirements = EXCLUDED.transport_requirements,
         exceptions_recommended = EXCLUDED.exceptions_recommended,
         minimum_biofuel_required = EXCLUDED.minimum_biofuel_required,
+        market_dialogue_recommended = EXCLUDED.market_dialogue_recommended,
         important_deadlines = EXCLUDED.important_deadlines,
         documentation_requirements = EXCLUDED.documentation_requirements,
         follow_up_points = EXCLUDED.follow_up_points,
-        market_dialogue_recommended = EXCLUDED.market_dialogue_recommended,
         award_criteria_recommended = EXCLUDED.award_criteria_recommended,
         recommendations = EXCLUDED.recommendations,
-        confidence = EXCLUDED.confidence,
+        warnings = EXCLUDED.warnings,
+        information_gaps = EXCLUDED.information_gaps,
         context_documents_used = EXCLUDED.context_documents_used,
+        confidence_factors = EXCLUDED.confidence_factors,
+        assessment_data = EXCLUDED.assessment_data,
         updated_at = NOW()
-    RETURNING id INTO v_assessment_id;
+    RETURNING id INTO v_id;
     
     RETURN jsonb_build_object(
         'status', 'success',
-        'assessmentId', v_assessment_id
+        'message', 'Environmental assessment saved',
+        'assessmentId', v_id
     );
 EXCEPTION WHEN OTHERS THEN
     RETURN jsonb_build_object(
@@ -420,44 +521,100 @@ EXCEPTION WHEN OTHERS THEN
         'message', SQLERRM
     );
 END;
-$$;
+$;
 
--- Function to save oslomodell assessment
-CREATE OR REPLACE FUNCTION save_oslomodell_assessment(params jsonb)
-RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER AS $$
+-- Save Oslomodell assessment with rich data
+CREATE OR REPLACE FUNCTION save_oslomodell_assessment(input_data jsonb)
+RETURNS jsonb
+LANGUAGE plpgsql AS $
 DECLARE
-    v_assessment_id UUID;
+    v_id UUID;
+    v_assessment_data JSONB;
 BEGIN
+    -- Build complete assessment data from input
+    v_assessment_data := input_data->'assessmentData';
+
+    IF v_assessment_data IS NULL OR jsonb_typeof(v_assessment_data) != 'object' THEN
+        RAISE EXCEPTION 'Input parameter must be a JSON object with a root key "assessmentData".';
+    END IF;
+    IF NOT v_assessment_data ? 'procurement_id' THEN
+        RAISE EXCEPTION 'Missing required field "procurement_id" inside assessmentData.';
+    END IF;
+    
     INSERT INTO oslomodell_assessments (
         procurement_id,
-        assessed_by,
-        applicable_requirements,
-        threshold_requirements,
-        recommendation,
+        procurement_name,
         confidence,
-        context_documents_used
+        assessed_by,
+        assessment_date,
+        crime_risk_assessment,
+        dd_risk_assessment,
+        social_dumping_risk,
+        subcontractor_levels,
+        subcontractor_justification,
+        required_requirements,
+        apprenticeship_requirement,
+        due_diligence_requirement,
+        applicable_instruction_points,
+        identified_risk_areas,
+        recommendations,
+        warnings,
+        information_gaps,
+        context_documents_used,
+        confidence_factors,
+        assessment_data
     )
     VALUES (
-        (params->>'procurement_id')::uuid,
-        COALESCE(params->>'assessed_by', 'oslomodell_agent'),
-        COALESCE(params->'applicable_requirements', '[]'::jsonb),
-        COALESCE(params->'threshold_requirements', '[]'::jsonb),
-        params->>'recommendation',
-        (params->>'confidence')::float,
-        ARRAY(SELECT jsonb_array_elements_text(params->'context_documents_used'))
+        (input_data->>'procurementId')::UUID,
+        COALESCE(v_assessment_data->>'procurement_name', input_data->>'procurementName', ''),
+        COALESCE((v_assessment_data->>'confidence')::FLOAT, 0.5),
+        COALESCE(v_assessment_data->>'assessed_by', 'oslomodell_agent'),
+        COALESCE((v_assessment_data->>'assessment_date')::TIMESTAMPTZ, NOW()),
+        v_assessment_data->>'crime_risk_assessment',
+        v_assessment_data->>'dd_risk_assessment',
+        v_assessment_data->>'social_dumping_risk',
+        (v_assessment_data->>'subcontractor_levels')::INTEGER,
+        v_assessment_data->>'subcontractor_justification',
+        COALESCE(v_assessment_data->'required_requirements', '[]'::jsonb),
+        COALESCE(v_assessment_data->'apprenticeship_requirement', '{}'::jsonb),
+        v_assessment_data->>'due_diligence_requirement',
+        COALESCE(v_assessment_data->'applicable_instruction_points', '[]'::jsonb),
+        COALESCE(v_assessment_data->'identified_risk_areas', '[]'::jsonb),
+        COALESCE(v_assessment_data->'recommendations', '[]'::jsonb),
+        COALESCE(v_assessment_data->'warnings', '[]'::jsonb),
+        COALESCE(v_assessment_data->'information_gaps', '[]'::jsonb),
+        COALESCE(v_assessment_data->'context_documents_used', '[]'::jsonb),
+        COALESCE(v_assessment_data->'confidence_factors', '{}'::jsonb),
+        v_assessment_data
     )
-    ON CONFLICT (procurement_id, assessed_by) DO UPDATE SET
-        applicable_requirements = EXCLUDED.applicable_requirements,
-        threshold_requirements = EXCLUDED.threshold_requirements,
-        recommendation = EXCLUDED.recommendation,
+    ON CONFLICT (procurement_id) DO UPDATE SET
+        procurement_name = EXCLUDED.procurement_name,
         confidence = EXCLUDED.confidence,
+        assessed_by = EXCLUDED.assessed_by,
+        assessment_date = EXCLUDED.assessment_date,
+        crime_risk_assessment = EXCLUDED.crime_risk_assessment,
+        dd_risk_assessment = EXCLUDED.dd_risk_assessment,
+        social_dumping_risk = EXCLUDED.social_dumping_risk,
+        subcontractor_levels = EXCLUDED.subcontractor_levels,
+        subcontractor_justification = EXCLUDED.subcontractor_justification,
+        required_requirements = EXCLUDED.required_requirements,
+        apprenticeship_requirement = EXCLUDED.apprenticeship_requirement,
+        due_diligence_requirement = EXCLUDED.due_diligence_requirement,
+        applicable_instruction_points = EXCLUDED.applicable_instruction_points,
+        identified_risk_areas = EXCLUDED.identified_risk_areas,
+        recommendations = EXCLUDED.recommendations,
+        warnings = EXCLUDED.warnings,
+        information_gaps = EXCLUDED.information_gaps,
         context_documents_used = EXCLUDED.context_documents_used,
+        confidence_factors = EXCLUDED.confidence_factors,
+        assessment_data = EXCLUDED.assessment_data,
         updated_at = NOW()
-    RETURNING id INTO v_assessment_id;
+    RETURNING id INTO v_id;
     
     RETURN jsonb_build_object(
         'status', 'success',
-        'assessmentId', v_assessment_id
+        'message', 'Oslomodell assessment saved',
+        'assessmentId', v_id
     );
 EXCEPTION WHEN OTHERS THEN
     RETURN jsonb_build_object(
@@ -465,77 +622,50 @@ EXCEPTION WHEN OTHERS THEN
         'message', SQLERRM
     );
 END;
-$$;
+$;
 
 -- ========================================
--- STEP 10: CREATE OSLOMODELL RPC FUNCTIONS
+-- STEP 9: CREATE OSLOMODELL KNOWLEDGE FUNCTIONS
 -- ========================================
 
--- Function to store oslomodell knowledge document
-CREATE OR REPLACE FUNCTION store_knowledge_document(params jsonb)
-RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER AS $$
-DECLARE
-    v_doc_id UUID;
-    v_embedding_array float[];
+-- Store Oslomodell document
+CREATE OR REPLACE FUNCTION store_knowledge_document(input_data jsonb)
+RETURNS jsonb
+LANGUAGE plpgsql AS $$
 BEGIN
-    -- Parse embedding from JSON array to float array
-    SELECT array_agg(value::float)::float[]
-    INTO v_embedding_array
-    FROM jsonb_array_elements_text(params->'embedding');
-    
-    -- Insert or update document
     INSERT INTO oslomodell_knowledge (document_id, content, embedding, metadata)
     VALUES (
-        params->>'documentId',
-        params->>'content',
-        v_embedding_array::vector,
-        COALESCE(params->'metadata', '{}'::jsonb)
+        input_data->>'documentId',
+        input_data->>'content',
+        (input_data->'embedding')::vector,
+        COALESCE(input_data->'metadata', '{}'::jsonb)
     )
     ON CONFLICT (document_id) DO UPDATE SET
         content = EXCLUDED.content,
         embedding = EXCLUDED.embedding,
-        metadata = EXCLUDED.metadata,
-        updated_at = NOW()
-    RETURNING id INTO v_doc_id;
+        metadata = EXCLUDED.metadata;
     
     RETURN jsonb_build_object(
         'status', 'success',
-        'documentId', params->>'documentId',
-        'id', v_doc_id
+        'documentId', input_data->>'documentId'
     );
 EXCEPTION WHEN OTHERS THEN
     RETURN jsonb_build_object(
         'status', 'error',
-        'message', SQLERRM,
-        'detail', SQLSTATE
+        'message', SQLERRM
     );
 END;
 $$;
 
--- Function to search oslomodell knowledge documents
-CREATE OR REPLACE FUNCTION search_knowledge_documents(params jsonb)
-RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER AS $$
+-- Search Oslomodell documents
+CREATE OR REPLACE FUNCTION search_knowledge_documents(input_data jsonb)
+RETURNS jsonb
+LANGUAGE plpgsql AS $$
 DECLARE
     v_results jsonb;
-    v_query_embedding vector;
-    v_embedding_array float[];
-    v_threshold float;
-    v_limit int;
-    v_metadata_filter jsonb;
+    v_threshold FLOAT := COALESCE((input_data->>'threshold')::FLOAT, 0.7);
+    v_limit INTEGER := COALESCE((input_data->>'limit')::INTEGER, 10);
 BEGIN
-    -- Parse parameters
-    v_threshold := COALESCE((params->>'threshold')::float, 0.7);
-    v_limit := COALESCE((params->>'limit')::int, 5);
-    v_metadata_filter := COALESCE(params->'metadataFilter', '{}'::jsonb);
-    
-    -- Parse embedding from JSON array to float array then to vector
-    SELECT array_agg(value::float)::float[]
-    INTO v_embedding_array
-    FROM jsonb_array_elements_text(params->'queryEmbedding');
-    
-    v_query_embedding := v_embedding_array::vector;
-    
-    -- Perform search
     SELECT jsonb_agg(
         jsonb_build_object(
             'documentId', document_id,
@@ -549,33 +679,29 @@ BEGIN
             document_id,
             content,
             metadata,
-            1 - (embedding <=> v_query_embedding) as similarity
+            1 - (embedding <=> (input_data->'queryEmbedding')::vector) AS similarity
         FROM oslomodell_knowledge
-        WHERE 
-            (v_metadata_filter = '{}'::jsonb OR metadata @> v_metadata_filter)
-            AND 1 - (embedding <=> v_query_embedding) > v_threshold
-        ORDER BY embedding <=> v_query_embedding
+        WHERE 1 - (embedding <=> (input_data->'queryEmbedding')::vector) >= v_threshold
+        ORDER BY similarity DESC
         LIMIT v_limit
-    ) AS search_results;
+    ) AS matches;
     
     RETURN jsonb_build_object(
         'status', 'success',
-        'results', COALESCE(v_results, '[]'::jsonb),
-        'count', COALESCE(jsonb_array_length(v_results), 0)
+        'results', COALESCE(v_results, '[]'::jsonb)
     );
 EXCEPTION WHEN OTHERS THEN
     RETURN jsonb_build_object(
         'status', 'error',
-        'message', SQLERRM,
-        'detail', SQLSTATE,
-        'results', '[]'::jsonb
+        'message', SQLERRM
     );
 END;
 $$;
 
--- Function to list oslomodell knowledge documents
-CREATE OR REPLACE FUNCTION list_knowledge_documents(params jsonb)
-RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER AS $$
+-- List Oslomodell documents
+CREATE OR REPLACE FUNCTION list_knowledge_documents(input_data jsonb)
+RETURNS jsonb
+LANGUAGE plpgsql AS $$
 DECLARE
     v_results jsonb;
 BEGIN
@@ -603,74 +729,47 @@ END;
 $$;
 
 -- ========================================
--- STEP 11: CREATE MILJOKRAV RPC FUNCTIONS
+-- STEP 10: CREATE MILJOKRAV KNOWLEDGE FUNCTIONS
 -- ========================================
 
--- Function to store miljokrav document
-CREATE OR REPLACE FUNCTION store_miljokrav_document(params jsonb)
-RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER AS $$
-DECLARE
-    v_doc_id UUID;
-    v_embedding_array float[];
+-- Store Miljokrav document
+CREATE OR REPLACE FUNCTION store_miljokrav_document(input_data jsonb)
+RETURNS jsonb
+LANGUAGE plpgsql AS $$
 BEGIN
-    -- Parse embedding from JSON array to float array
-    SELECT array_agg(value::float)::float[]
-    INTO v_embedding_array
-    FROM jsonb_array_elements_text(params->'embedding');
-    
-    -- Insert or update document
     INSERT INTO miljokrav_knowledge (document_id, content, embedding, metadata)
     VALUES (
-        params->>'documentId',
-        params->>'content',
-        v_embedding_array::vector,
-        COALESCE(params->'metadata', '{}'::jsonb)
+        input_data->>'documentId',
+        input_data->>'content',
+        (input_data->'embedding')::vector,
+        COALESCE(input_data->'metadata', '{}'::jsonb)
     )
     ON CONFLICT (document_id) DO UPDATE SET
         content = EXCLUDED.content,
         embedding = EXCLUDED.embedding,
-        metadata = EXCLUDED.metadata,
-        updated_at = NOW()
-    RETURNING id INTO v_doc_id;
+        metadata = EXCLUDED.metadata;
     
     RETURN jsonb_build_object(
         'status', 'success',
-        'documentId', params->>'documentId',
-        'id', v_doc_id
+        'documentId', input_data->>'documentId'
     );
 EXCEPTION WHEN OTHERS THEN
     RETURN jsonb_build_object(
         'status', 'error',
-        'message', SQLERRM,
-        'detail', SQLSTATE
+        'message', SQLERRM
     );
 END;
 $$;
 
--- Function to search miljokrav documents
-CREATE OR REPLACE FUNCTION search_miljokrav_documents(params jsonb)
-RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER AS $$
+-- Search Miljokrav documents
+CREATE OR REPLACE FUNCTION search_miljokrav_documents(input_data jsonb)
+RETURNS jsonb
+LANGUAGE plpgsql AS $$
 DECLARE
     v_results jsonb;
-    v_query_embedding vector;
-    v_embedding_array float[];
-    v_threshold float;
-    v_limit int;
-    v_metadata_filter jsonb;
+    v_threshold FLOAT := COALESCE((input_data->>'threshold')::FLOAT, 0.7);
+    v_limit INTEGER := COALESCE((input_data->>'limit')::INTEGER, 10);
 BEGIN
-    -- Parse parameters
-    v_threshold := COALESCE((params->>'threshold')::float, 0.7);
-    v_limit := COALESCE((params->>'limit')::int, 5);
-    v_metadata_filter := COALESCE(params->'metadataFilter', '{}'::jsonb);
-    
-    -- Parse embedding
-    SELECT array_agg(value::float)::float[]
-    INTO v_embedding_array
-    FROM jsonb_array_elements_text(params->'queryEmbedding');
-    
-    v_query_embedding := v_embedding_array::vector;
-    
-    -- Perform search
     SELECT jsonb_agg(
         jsonb_build_object(
             'documentId', document_id,
@@ -684,32 +783,29 @@ BEGIN
             document_id,
             content,
             metadata,
-            1 - (embedding <=> v_query_embedding) as similarity
+            1 - (embedding <=> (input_data->'queryEmbedding')::vector) AS similarity
         FROM miljokrav_knowledge
-        WHERE 
-            (v_metadata_filter = '{}'::jsonb OR metadata @> v_metadata_filter)
-            AND 1 - (embedding <=> v_query_embedding) > v_threshold
-        ORDER BY embedding <=> v_query_embedding
+        WHERE 1 - (embedding <=> (input_data->'queryEmbedding')::vector) >= v_threshold
+        ORDER BY similarity DESC
         LIMIT v_limit
-    ) AS search_results;
+    ) AS matches;
     
     RETURN jsonb_build_object(
         'status', 'success',
-        'results', COALESCE(v_results, '[]'::jsonb),
-        'count', COALESCE(jsonb_array_length(v_results), 0)
+        'results', COALESCE(v_results, '[]'::jsonb)
     );
 EXCEPTION WHEN OTHERS THEN
     RETURN jsonb_build_object(
         'status', 'error',
-        'message', SQLERRM,
-        'results', '[]'::jsonb
+        'message', SQLERRM
     );
 END;
 $$;
 
--- Function to list miljokrav documents
-CREATE OR REPLACE FUNCTION list_miljokrav_documents(params jsonb)
-RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER AS $$
+-- List Miljokrav documents
+CREATE OR REPLACE FUNCTION list_miljokrav_documents(input_data jsonb)
+RETURNS jsonb
+LANGUAGE plpgsql AS $$
 DECLARE
     v_results jsonb;
 BEGIN
@@ -737,10 +833,10 @@ END;
 $$;
 
 -- ========================================
--- STEP 12: POPULATE GATEWAY SERVICE CATALOG
+-- STEP 11: POPULATE GATEWAY SERVICE CATALOG
 -- ========================================
 
--- Register all functions
+-- Register all functions in the service catalog
 INSERT INTO gateway_service_catalog (service_name, service_type, function_key, sql_function_name, function_metadata)
 VALUES
     -- Core procurement functions
@@ -748,7 +844,10 @@ VALUES
      '{"description": "Creates a new procurement record", "input_schema": {"type": "object", "properties": {"name": {"type": "string"}, "value": {"type": "integer"}, "description": {"type": "string"}, "category": {"type": "string"}, "duration_months": {"type": "integer"}, "includes_construction": {"type": "boolean"}}, "required": ["name", "value"]}}'::jsonb),
     
     ('database', 'postgres_rpc', 'save_triage_result', 'save_triage_result',
-     '{"description": "Saves triage assessment result", "input_schema": {"type": "object", "properties": {"procurementId": {"type": "string"}, "color": {"type": "string"}, "reasoning": {"type": "string"}, "confidence": {"type": "number"}}, "required": ["procurementId", "color", "reasoning", "confidence"]}}'::jsonb),
+     '{"description": "Saves enriched triage assessment result", "input_schema": {"type": "object", "properties": {"procurementId": {"type": "string"}, "color": {"type": "string"}, "reasoning": {"type": "string"}, "confidence": {"type": "number"}, "riskFactors": {"type": "array", "items": {"type": "string"}}, "mitigationMeasures": {"type": "array", "items": {"type": "string"}}, "requiresSpecialAttention": {"type": "boolean"}, "escalationRecommended": {"type": "boolean"}, "assessedBy": {"type": "string"}, "assessmentDate": {"type": "string", "format": "date-time"}}, "required": ["procurementId", "color", "reasoning", "confidence"]}}'::jsonb),
+    
+    ('database', 'postgres_rpc', 'save_triage', 'save_triage',
+     '{"description": "Alias for save_triage_result", "input_schema": {"type": "object", "properties": {"procurementId": {"type": "string"}, "color": {"type": "string"}, "reasoning": {"type": "string"}, "confidence": {"type": "number"}, "riskFactors": {"type": "array", "items": {"type": "string"}}, "mitigationMeasures": {"type": "array", "items": {"type": "string"}}, "requiresSpecialAttention": {"type": "boolean"}, "escalationRecommended": {"type": "boolean"}, "assessedBy": {"type": "string"}, "assessmentDate": {"type": "string", "format": "date-time"}}, "required": ["procurementId", "color", "reasoning", "confidence"]}}'::jsonb),
     
     ('database', 'postgres_rpc', 'set_procurement_status', 'set_procurement_status',
      '{"description": "Updates procurement status", "input_schema": {"type": "object", "properties": {"procurementId": {"type": "string"}, "status": {"type": "string"}}, "required": ["procurementId", "status"]}}'::jsonb),
@@ -759,12 +858,12 @@ VALUES
     ('database', 'postgres_rpc', 'log_execution', 'log_execution',
      '{"description": "Logs execution step", "input_schema": {"type": "object", "properties": {"sessionId": {"type": "string"}, "action": {"type": "object"}, "result": {"type": "object"}}, "required": ["sessionId", "action"]}}'::jsonb),
     
-    -- Assessment functions
+    -- Assessment functions with rich data models
     ('database', 'postgres_rpc', 'save_environmental_assessment', 'save_environmental_assessment',
-     '{"description": "Saves environmental assessment result", "input_schema": {"type": "object"}}'::jsonb),
+     '{"description": "Saves enriched environmental assessment result", "input_schema": {"type": "object", "properties": {"procurementId": {"type": "string"}, "procurementName": {"type": "string"}, "assessmentData": {"type": "object", "properties": {"environmental_risk": {"type": "string", "enum": ["lav", "middels", "høy"]}, "climate_impact_assessed": {"type": "boolean"}, "applied_requirements": {"type": "array"}, "transport_requirements": {"type": "array"}, "exceptions_recommended": {"type": "array"}, "minimum_biofuel_required": {"type": "boolean"}, "market_dialogue_recommended": {"type": "boolean"}, "important_deadlines": {"type": "object"}, "documentation_requirements": {"type": "array"}, "follow_up_points": {"type": "array"}, "award_criteria_recommended": {"type": "array"}, "recommendations": {"type": "array"}, "warnings": {"type": "array"}, "confidence": {"type": "number"}}}}, "required": ["procurementId", "assessmentData"]}}'::jsonb),
     
     ('database', 'postgres_rpc', 'save_oslomodell_assessment', 'save_oslomodell_assessment',
-     '{"description": "Saves Oslomodell assessment result", "input_schema": {"type": "object"}}'::jsonb),
+     '{"description": "Saves enriched Oslomodell assessment result", "input_schema": {"type": "object", "properties": {"procurementId": {"type": "string"}, "procurementName": {"type": "string"}, "assessmentData": {"type": "object", "properties": {"crime_risk_assessment": {"type": "string", "enum": ["høy", "moderat", "lav"]}, "dd_risk_assessment": {"type": "string", "enum": ["høy", "moderat", "lav"]}, "social_dumping_risk": {"type": "string", "enum": ["høy", "moderat", "lav"]}, "subcontractor_levels": {"type": "integer", "minimum": 0, "maximum": 2}, "subcontractor_justification": {"type": "string"}, "required_requirements": {"type": "array"}, "apprenticeship_requirement": {"type": "object"}, "due_diligence_requirement": {"type": "string", "enum": ["A", "B", "Ikke påkrevd"]}, "applicable_instruction_points": {"type": "array"}, "identified_risk_areas": {"type": "array"}, "recommendations": {"type": "array"}, "warnings": {"type": "array"}, "confidence": {"type": "number"}}}}, "required": ["procurementId", "assessmentData"]}}'::jsonb),
     
     -- Oslomodell knowledge functions
     ('database', 'postgres_rpc', 'store_knowledge_document', 'store_knowledge_document',
@@ -792,15 +891,16 @@ ON CONFLICT (service_name, function_key) DO UPDATE SET
     is_active = true;
 
 -- ========================================
--- STEP 13: POPULATE GATEWAY ACL CONFIG
+-- STEP 12: POPULATE GATEWAY ACL CONFIG
 -- ========================================
 
--- Grant access to all relevant agents
+-- Grant full access to reasoning_orchestrator for ALL functions
 INSERT INTO gateway_acl_config (agent_id, allowed_method)
 VALUES
     -- Reasoning orchestrator needs everything
     ('reasoning_orchestrator', 'database.create_procurement'),
     ('reasoning_orchestrator', 'database.save_triage_result'),
+    ('reasoning_orchestrator', 'database.save_triage'),
     ('reasoning_orchestrator', 'database.set_procurement_status'),
     ('reasoning_orchestrator', 'database.save_protocol'),
     ('reasoning_orchestrator', 'database.log_execution'),
@@ -813,23 +913,24 @@ VALUES
     ('reasoning_orchestrator', 'database.search_miljokrav_documents'),
     ('reasoning_orchestrator', 'database.list_miljokrav_documents'),
     
-    -- Triage agent
+    -- Triage agent permissions
     ('triage_agent', 'database.save_triage_result'),
+    ('triage_agent', 'database.save_triage'),
     
-    -- Protocol agent
+    -- Protocol agent permissions
     ('protocol_agent', 'database.save_protocol'),
     
-    -- Oslomodell agent
+    -- Oslomodell agent permissions
     ('oslomodell_agent', 'database.search_knowledge_documents'),
     ('oslomodell_agent', 'database.list_knowledge_documents'),
     ('oslomodell_agent', 'database.save_oslomodell_assessment'),
     
-    -- Environmental agent (miljokrav)
+    -- Environmental agent (miljokrav) permissions
     ('environmental_agent', 'database.search_miljokrav_documents'),
     ('environmental_agent', 'database.list_miljokrav_documents'),
     ('environmental_agent', 'database.save_environmental_assessment'),
     
-    -- Knowledge ingester (for loading data)
+    -- Knowledge ingester permissions (for loading data)
     ('knowledge_ingester', 'database.store_knowledge_document'),
     ('knowledge_ingester', 'database.search_knowledge_documents'),
     ('knowledge_ingester', 'database.list_knowledge_documents'),
@@ -839,3 +940,57 @@ VALUES
 
 ON CONFLICT (agent_id, allowed_method) DO UPDATE SET
     is_active = true;
+
+-- ========================================
+-- STEP 13: VERIFICATION
+-- ========================================
+
+-- Output verification information
+DO $$
+DECLARE
+    v_tables_count INTEGER;
+    v_functions_count INTEGER;
+    v_catalog_count INTEGER;
+    v_acl_count INTEGER;
+BEGIN
+    -- Count tables
+    SELECT COUNT(*) INTO v_tables_count
+    FROM information_schema.tables
+    WHERE table_schema = 'public'
+    AND table_name IN ('procurements', 'triage_results', 'protocols', 'executions', 
+                       'environmental_assessments', 'oslomodell_assessments',
+                       'oslomodell_knowledge', 'miljokrav_knowledge',
+                       'gateway_service_catalog', 'gateway_acl_config');
+    
+    -- Count functions
+    SELECT COUNT(*) INTO v_functions_count
+    FROM information_schema.routines
+    WHERE routine_schema = 'public'
+    AND routine_type = 'FUNCTION';
+    
+    -- Count service catalog entries
+    SELECT COUNT(*) INTO v_catalog_count
+    FROM gateway_service_catalog
+    WHERE is_active = true;
+    
+    -- Count ACL entries
+    SELECT COUNT(*) INTO v_acl_count
+    FROM gateway_acl_config
+    WHERE is_active = true;
+    
+    RAISE NOTICE '========================================';
+    RAISE NOTICE 'DATABASE SETUP COMPLETE';
+    RAISE NOTICE '========================================';
+    RAISE NOTICE 'Tables created: %', v_tables_count;
+    RAISE NOTICE 'Functions created: %', v_functions_count;
+    RAISE NOTICE 'Service catalog entries: %', v_catalog_count;
+    RAISE NOTICE 'ACL rules configured: %', v_acl_count;
+    RAISE NOTICE '========================================';
+    RAISE NOTICE 'RICH DATA MODELS ENABLED:';
+    RAISE NOTICE '✓ Triage: risk_factors, mitigation_measures, flags';
+    RAISE NOTICE '✓ Environmental: transport_requirements, deadlines, criteria';
+    RAISE NOTICE '✓ Oslomodell: crime/dd/social risk, requirements, apprentices';
+    RAISE NOTICE '========================================';
+    RAISE NOTICE 'Reasoning orchestrator has full access to all % functions', v_catalog_count;
+    RAISE NOTICE '========================================';
+END $$;

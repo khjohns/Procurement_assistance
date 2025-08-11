@@ -56,7 +56,8 @@ Svar KUN med JSON som følger dette formatet:
     name="agent.run_triage",
     service_type="specialist_agent",
     metadata=TRIAGE_METADATA,
-    dependencies=["llm_gateway"]
+    dependencies=["llm_gateway"],
+    save_method="database.save_triage_result"
 )
 @with_schemas(input_schema=ProcurementRequest, output_schema=TriageResult)
 class TriageAgent(BaseSpecialistAgent):

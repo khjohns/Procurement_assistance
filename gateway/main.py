@@ -107,7 +107,6 @@ class ResponseValidator:
     async def validate(result: Any, method: str) -> Any:
         """Validates that RPC response is in expected format"""
         validators = {
-            "database.save_triage_result": ResponseValidator._validate_triage_save,
             "database.search_oslomodell_requirements": ResponseValidator._validate_search_result,
             "database.set_procurement_status": ResponseValidator._validate_status_update,
             "database.save_protocol": ResponseValidator._validate_protocol_save,
@@ -117,25 +116,6 @@ class ResponseValidator:
         validator = validators.get(method)
         if validator:
             return await validator(result)
-        return result
-    
-    @staticmethod
-    async def _validate_triage_save(result: Any) -> Dict[str, Any]:
-        """Validates response from save_triage_result"""
-        if isinstance(result, str):
-            try:
-                result = json.loads(result)
-            except json.JSONDecodeError:
-                raise RPCError(ErrorCodes.INTERNAL_ERROR, "Invalid JSON response from database")
-        
-        if not isinstance(result, dict):
-            raise RPCError(ErrorCodes.INTERNAL_ERROR, "Expected dict response")
-        
-        required_fields = ["status", "resultId"]
-        for field in required_fields:
-            if field not in result:
-                raise RPCError(ErrorCodes.INTERNAL_ERROR, f"Missing required field: {field}")
-        
         return result
     
     @staticmethod

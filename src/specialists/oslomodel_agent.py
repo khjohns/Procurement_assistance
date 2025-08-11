@@ -64,7 +64,8 @@ OPPGAVE:
     name="agent.run_oslomodell",
     service_type="specialist_agent",
     metadata=OSLOMODELL_METADATA,
-    dependencies=["llm_gateway", "embedding_gateway"]
+    dependencies=["llm_gateway", "embedding_gateway"],
+    save_method="database.save_oslomodell_assessment"
 )
 @with_schemas(
     input_schema=ProcurementRequest,

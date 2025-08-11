@@ -54,7 +54,8 @@ Svar alltid strukturert basert på instruksen.
     name="agent.run_environmental",
     service_type="specialist_agent",
     metadata=ENVIRONMENTAL_METADATA,
-    dependencies=["llm_gateway", "embedding_gateway"]
+    dependencies=["llm_gateway", "embedding_gateway"],
+    save_method="database.save_environmental_assessment"
 )
 @with_schemas(
     input_schema=ProcurementRequest,
