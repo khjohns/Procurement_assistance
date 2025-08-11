@@ -1,4 +1,4 @@
-# src/specialists/oslomodell_agent.py - SIMPLIFIED REFACTORED VERSION
+# src/specialists/oslomodel_agent.py
 """
 Oslomodell compliance agent - Simplified to only identify requirement codes.
 The actual requirement details come from separate contract documents.
@@ -14,15 +14,13 @@ from src.agent_library.registry import register_tool
 from src.agent_library.decorators import build_metadata, with_schemas
 
 # Import centralized models
-from src.models.procurement_models_refactored import (
-    ProcurementRequest,
-    OslomodellAssessmentResult,
-    Requirement,
-    RequirementSource,
-    RequirementCategory,
-    ApprenticeshipRequirement
-)
 from src.tools.rpc_gateway_client import RPCGatewayClient
+from src.tools.embedding_gateway import EmbeddingGateway
+from src.tools.llm_gateway import LLMGateway
+from src.models.procurement_models import (
+    ProcurementRequest, 
+    OslomodellAssessmentResult
+)
 
 logger = structlog.get_logger()
 
@@ -72,7 +70,7 @@ OPPGAVE:
     input_schema=ProcurementRequest,
     output_schema=OslomodellAssessmentResult
 )
-class OslomodellAgent(BaseSpecialistAgent):
+class OslomodelAgent(BaseSpecialistAgent):
     """
     Simplified N3 Specialist: Identifies Oslomodell requirement codes.
     Does NOT generate requirement descriptions - these come from contract documents.
@@ -187,7 +185,7 @@ class OslomodellAgent(BaseSpecialistAgent):
         context_documents = []
         
         async with RPCGatewayClient(
-            agent_id="oslomodell_agent",
+            agent_id="oslomodel_agent",
             gateway_url=self.rpc_gateway_url
         ) as rpc_client:
             

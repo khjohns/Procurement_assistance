@@ -11,8 +11,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 import json
 
-# Add project root to path
-sys.path.insert(0, str(Path(__file__).parent.parent))
+
 
 from src.tools.enhanced_llm_gateway import LLMGateway
 from src.tools.embedding_gateway import EmbeddingGateway

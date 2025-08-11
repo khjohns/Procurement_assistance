@@ -143,13 +143,14 @@ def generate_gateway_catalog_sql() -> str:
         
         # Convert metadata to JSON string
         metadata_json = json.dumps(tool_info["metadata"])
+        metadata_json_escaped = metadata_json.replace("'", "''")
         
         statement = f"""
 INSERT INTO gateway_service_catalog 
     (service_name, service_type, function_key, sql_function_name, function_metadata)
 VALUES 
     ('{service_name}', '{tool_info["service_type"]}', '{function_key}', 
-     '{sql_function_name}', '{metadata_json}'::jsonb)
+     '{sql_function_name}', '{metadata_json_escaped}'::jsonb)
 ON CONFLICT (service_name, function_key) DO UPDATE SET 
     sql_function_name = EXCLUDED.sql_function_name,
     function_metadata = EXCLUDED.function_metadata,

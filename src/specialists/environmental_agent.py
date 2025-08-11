@@ -1,4 +1,4 @@
-# src/specialists/environmental_agent_refactored.py
+# src/specialists/environmental_agent.py
 """
 Environmental compliance agent with hybrid RAG.
 Uses SDK base classes and RPC Gateway for knowledge retrieval.
@@ -13,7 +13,7 @@ from datetime import datetime
 from src.agent_library.core import BaseSpecialistAgent
 from src.agent_library.registry import register_tool
 from src.agent_library.decorators import build_metadata, with_schemas
-from src.models.procurement_models_refactored import (
+from src.models.procurement_models import (
     ProcurementRequest, 
     EnvironmentalAssessmentResult,
     TransportRequirement,

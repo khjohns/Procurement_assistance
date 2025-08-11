@@ -25,8 +25,8 @@ from src.agent_library.registry import (
 # This triggers the @register_tool decorators
 import src.specialists.triage_agent
 # Import other agents as you create them:
-import src.specialists.oslomodel_agent
-import src.specialists.environmental_agent
+import src.specialists.oslomodell_agent_refactored
+import src.specialists.environmental_agent_refactored
 # import src.specialists.protocol_generator
 
 logger = structlog.get_logger()

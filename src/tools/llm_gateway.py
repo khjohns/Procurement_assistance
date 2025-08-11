@@ -37,29 +37,6 @@ class LLMUsageMetrics:
         self.total_tokens_input += input_tokens
         self.total_tokens_output += output_tokens
 
-class GeminiGateway:
-    """Drop-in replacement using enhanced LLM Gateway."""
-    
-    def __init__(self, api_key: str = None):
-        from src.tools.enhanced_llm_gateway import LLMGateway
-        self._llm = LLMGateway()  # Ignorer api_key, bruker env
-    
-    async def generate(self, prompt: str, **kwargs) -> str:
-        # Map gamle parametere til nye
-        purpose = "default"
-        
-        # Intelligent purpose detection
-        if "triage" in prompt.lower():
-            purpose = "fast_evaluation"
-        elif len(prompt) > 2000:
-            purpose = "complex_reasoning"
-        
-        return await self._llm.generate(
-            prompt=prompt,
-            purpose=purpose,
-            **kwargs
-        )
-
 class LLMGateway:
     """
     Universal gateway for interacting with language models.
@@ -247,7 +224,7 @@ class LLMGateway:
         return json.dumps({
             "error": "LLM generation failed",
             "error_code": error_code,
-            "details": error_message.replace('"', "'"),
+            "details": error_message.replace('"', "'", 1), # Corrected: only replace the first occurrence of " to ' if it's part of the error message itself
             "model_info": {
                 "available_models": list(self.model_map.values()),
                 "retry_suggested": True
@@ -270,12 +247,7 @@ class LLMGateway:
         """
         
         # Enhance prompt with schema information
-        enhanced_prompt = f"""{prompt}
-
-IMPORTANT: Respond with a valid JSON object that matches this schema:
-{json.dumps(response_schema, indent=2)}
-
-Your response must be valid JSON and nothing else."""
+        enhanced_prompt = f"{prompt}\n\nIMPORTANT: Respond with a valid JSON object that matches this schema:\n{json.dumps(response_schema, indent=2)}\n\nYour response must be valid JSON and nothing else."
         
         response = await self.generate(
             prompt=enhanced_prompt,

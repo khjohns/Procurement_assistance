@@ -9,8 +9,7 @@ import sys
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Legg til rotmappen i systemstien for å finne kildekode
-sys.path.insert(0, str(Path(__file__).parent.parent))
+
 
 from src.specialists.environmental_agent_refactored import EnvironmentalAgent
 from src.models.procurement_models_refactored import (

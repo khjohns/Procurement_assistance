@@ -287,7 +287,7 @@ class TracedLLMGateway(LLMGateway):
 
 
 # 7. Simplified factory with all enhancements
-def create_enhanced_llm_gateway(
+def create_llm_gateway(
     enable_caching: bool = True,
     enable_batching: bool = False,  # Experimental
     enable_tracing: bool = True,

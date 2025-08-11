@@ -13,7 +13,7 @@ from datetime import datetime
 from typing import Dict, Any
 from enum import Enum
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
+
 
 from src.tools.enhanced_llm_gateway import LLMGateway
 from src.tools.embedding_gateway import EmbeddingGateway
