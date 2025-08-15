@@ -184,11 +184,10 @@ async def test_refactored_agent():
         from src.tools.oslomodel_document_generator import OslomodelDocumentGenerator
         generator = OslomodelDocumentGenerator()
         doc_path = generator.generate_document(
-            procurement_data=procurement.model_dump(),
-            oslomodell_result=result_dict)
+            procurement_data=procurement,
+            oslomodell_result=result)
 
-        print(f"\\n📄 Generated comprehensive document: {doc_path}")
-
+        print(f"\n📄 Generated comprehensive document: {doc_path}")
         
         return True
         
@@ -225,13 +224,13 @@ async def test_model_serialization():
         ],
         subcontractor_levels=1,
         subcontractor_justification="Moderat risiko tilsier ett ledd",
-        apprenticeship_requirement={
-            "required": True,
-            "reason": "Over terskelverdi",
-            "minimum_count": 2,
-            "applicable_trades": ["tømrerfaget"],
-            "threshold_exceeded": True
-        },
+        apprenticeship_requirement=ApprenticeshipRequirement(
+            required=True,
+            reason="Over terskelverdi",
+            minimum_count=2,
+            applicable_trades=["tømrerfaget"],
+            threshold_exceeded=True
+        ),
         recommendations=["Test recommendation"]
     )
     

@@ -1,0 +1,1378 @@
+[
+  {
+    "chunk_id": "Instruks_oslomodellen-8bf65b2a-a603-4cc2-ac97-4f7f0ce69668",
+    "source_document": "Instruks_oslomodellen.pdf",
+    "document_type": "instruks",
+    "title": "Formål",
+    "content": "1. Formål\nFormålet med instruksen er å fastsette overordnede krav og føringer til kommunens \nanskaffelser, tilrettelegge for effektive og ensartede anskaffelsesprosesser, bidra til å \nforebygge og bekjempe arbeidslivskriminalitet og sosial dumping i kommunens \nleverandørkjeder, bidra til å støtte opp under grunnleggende menneskerettigheter, anstendige \narbeidsforhold og internasjonal humanitærrett, samt hindre miljøødeleggelser og unngå \nkorrupsjon i kommunens leverandørkjeder samt styrke kommunens kontraktsoppfølging.",
+    "summary": "Instruksens formål er å fastsette overordnede krav og føringer for kommunens anskaffelser, sikre effektive og ensartede prosesser, forebygge arbeidslivskriminalitet, sosial dumping, miljøødeleggelser og korrupsjon i leverandørkjedene, samt styrke kontraktsoppfølgingen.",
+    "source_page": 1,
+    "section_number": "1",
+    "parent_chunk_id": null,
+    "child_chunk_ids": [],
+    "related_chunk_ids": [],
+    "references_to_other_docs": [],
+    "status": "aktiv",
+    "version": "1.0",
+    "created_at": "2023-10-27T10:00:00Z",
+    "updated_at": "2023-10-27T10:00:00Z",
+    "keywords": [
+      "formål",
+      "instruks",
+      "anskaffelser",
+      "arbeidslivskriminalitet",
+      "sosial dumping",
+      "menneskerettigheter",
+      "arbeidsforhold",
+      "miljøødeleggelser",
+      "korrupsjon",
+      "kontraktsoppfølging"
+    ],
+    "semantic_tags": [
+      "anskaffelser",
+      "formål",
+      "risikohåndtering",
+      "samfunnsansvar",
+      "miljø"
+    ],
+    "confidence_score": 1.0,
+    "chunk_type": "kontekst",
+    "rule_sets": [],
+    "requirement_codes": [],
+    "risk_levels": [
+      "lav",
+      "moderat",
+      "høy"
+    ],
+    "value_thresholds": {},
+    "due_diligence_set": null,
+    "max_subcontractor_levels": null,
+    "subcontractor_conditions": [],
+    "apprentice_required": null,
+    "apprentice_threshold": null
+  },
+  {
+    "chunk_id": "Instruks_oslomodellen-ac294ffe-a4f0-4c5e-9c6d-e96e71672d08",
+    "source_document": "Instruks_oslomodellen.pdf",
+    "document_type": "instruks",
+    "title": "3. Bruk av standardkontrakter og standardkrav",
+    "content": "3. Bruk av standardkontrakter og standardkrav\n3.1 Virksomhetene plikter å bruke vedtatte standardkontrakter med tilhørende \nkontraktsformularer eller bilag når de foretar anskaffelser av varer, tjenester eller bygg \nog anlegg over kr 500 000 på områder som omfattes av en standardkontrakt. \n3.2 På områder som ikke er omfattet av vedtatte standardkontrakter, skal virksomhetene \nbruke Oslomodellen i henhold til instruksens punkt 4, 5, 6 og 7.",
+    "summary": "Denne teksten beskriver når virksomheter plikter å bruke standardkontrakter for anskaffelser over 500 000 kr, og når Oslomodellen skal brukes på områder som ikke er dekket av standardkontrakter, med henvisning til punktene 4, 5, 6 og 7.",
+    "source_page": 1,
+    "section_number": "3",
+    "parent_chunk_id": null,
+    "child_chunk_ids": [],
+    "related_chunk_ids": [
+      "Instruks_oslomodellen-4e45da5d-c536-4063-bf9c-be9502ea3c06"
+    ],
+    "references_to_other_docs": [],
+    "status": "aktiv",
+    "version": "1.0",
+    "created_at": "2023-10-27T10:00:00Z",
+    "updated_at": "2023-10-27T10:00:00Z",
+    "keywords": [
+      "standardkontrakter",
+      "Oslomodellen",
+      "anskaffelser",
+      "kontraktsverdi"
+    ],
+    "semantic_tags": [
+      "regelverk",
+      "kontrakt"
+    ],
+    "confidence_score": 1.0,
+    "chunk_type": "regel",
+    "rule_sets": [
+      {
+        "description": "Plikt til å bruke vedtatte standardkontrakter for anskaffelser av varer, tjenester eller bygg og anlegg over kr 500 000 på områder som omfattes av en standardkontrakt.",
+        "applies_to_codes": [],
+        "conditions": [
+          {
+            "field": "kontraktsverdi",
+            "operator": ">",
+            "value": 500000
+          },
+          {
+            "field": "område",
+            "operator": "=",
+            "value": "omfattet av standardkontrakt"
+          }
+        ]
+      },
+      {
+        "description": "Plikt til å bruke Oslomodellen på områder som ikke er omfattet av vedtatte standardkontrakter, i henhold til instruksens punkt 4, 5, 6 og 7.",
+        "applies_to_codes": [],
+        "conditions": [
+          {
+            "field": "område",
+            "operator": "not_in",
+            "value": [
+              "omfattet av standardkontrakt"
+            ]
+          }
+        ]
+      }
+    ],
+    "requirement_codes": [],
+    "risk_levels": [],
+    "value_thresholds": {
+      "standardkontrakt_grense": 500000
+    },
+    "due_diligence_set": null,
+    "max_subcontractor_levels": null,
+    "subcontractor_conditions": [],
+    "apprentice_required": null,
+    "apprentice_threshold": null
+  },
+  {
+    "chunk_id": "Instruks_oslomodellen-4e45da5d-c536-4063-bf9c-be9502ea3c06",
+    "source_document": "Instruks_oslomodellen.pdf",
+    "document_type": "instruks",
+    "title": "4. Anvendelsesområde for Oslomodellens seriøsitetskrav",
+    "content": "4. Anvendelsesområde for Oslomodellens seriøsitetskrav\n4.1 I bygge-, anleggs- og tjenesteanskaffelser fra kr 100 000 til kr 500 000 skal krav A-E \nalltid benyttes. Krav F-T skal benyttes ved risiko for arbeidslivskriminalitet og sosial \ndumping. \n4.2 I bygge-, anleggs- og renholdsanskaffelser over kr 500 000 skal krav A-U alltid \nbenyttes. Krav V skal benyttes alltid når vilkårene er oppfylt, jf. punkt 6.\n4.3 I tjenesteanskaffelser over kr 500 000 skal krav A-H alltid benyttes. Krav I-T skal \nbenyttes ved risiko for arbeidslivskriminalitet eller sosial dumping. Krav V skal alltid \nbenyttes når vilkårene er oppfylt, jf. punkt 6.",
+    "summary": "Dette avsnittet beskriver anvendelsesområdet for Oslomodellens seriøsitetskrav basert på anskaffelsestype, kontraktsverdi og risikonivå. Det spesifiserer hvilke kravkoder (A-V) som skal benyttes for bygge-, anleggs-, tjeneste- og renholdsanskaffelser, med spesifikke terskelverdier på 100 000 kr og 500 000 kr, samt betingelser knyttet til risiko for arbeidslivskriminalitet og sosial dumping, og oppfylte vilkår i henhold til punkt 6.",
+    "source_page": 1,
+    "section_number": "4",
+    "parent_chunk_id": null,
+    "child_chunk_ids": [],
+    "related_chunk_ids": [
+      "Instruks_oslomodellen-ac294ffe-a4f0-4c5e-9c6d-e96e71672d08"
+    ],
+    "references_to_other_docs": [],
+    "status": "aktiv",
+    "version": "1.0",
+    "created_at": "2023-10-27T10:00:00Z",
+    "updated_at": "2023-10-27T10:00:00Z",
+    "keywords": [
+      "Oslomodellen",
+      "seriøsitetskrav",
+      "anskaffelser",
+      "kontraktsverdi",
+      "risiko",
+      "bygge",
+      "anleggs",
+      "tjeneste",
+      "renholds",
+      "arbeidslivskriminalitet",
+      "sosial dumping"
+    ],
+    "semantic_tags": [
+      "regelverk",
+      "seriøsitet"
+    ],
+    "confidence_score": 1.0,
+    "chunk_type": "regel",
+    "rule_sets": [
+      {
+        "description": "Krav A-E for bygge-, anleggs- og tjenesteanskaffelser mellom 100 000 og 500 000 kr.",
+        "applies_to_codes": [
+          "A",
+          "B",
+          "C",
+          "D",
+          "E"
+        ],
+        "conditions": [
+          {
+            "field": "anskaffelsestype",
+            "operator": "in",
+            "value": [
+              "bygge",
+              "anleggs",
+              "tjeneste"
+            ]
+          },
+          {
+            "field": "kontraktsverdi",
+            "operator": "between",
+            "value": [
+              100000,
+              500000
+            ]
+          }
+        ]
+      },
+      {
+        "description": "Krav F-T for bygge-, anleggs- og tjenesteanskaffelser mellom 100 000 og 500 000 kr ved risiko for arbeidslivskriminalitet og sosial dumping.",
+        "applies_to_codes": [
+          "F",
+          "G",
+          "H",
+          "I",
+          "J",
+          "K",
+          "L",
+          "M",
+          "N",
+          "O",
+          "P",
+          "Q",
+          "R",
+          "S",
+          "T"
+        ],
+        "conditions": [
+          {
+            "field": "anskaffelsestype",
+            "operator": "in",
+            "value": [
+              "bygge",
+              "anleggs",
+              "tjeneste"
+            ]
+          },
+          {
+            "field": "kontraktsverdi",
+            "operator": "between",
+            "value": [
+              100000,
+              500000
+            ]
+          },
+          {
+            "field": "risiko",
+            "operator": "in",
+            "value": [
+              "arbeidslivskriminalitet",
+              "sosial dumping"
+            ]
+          }
+        ]
+      },
+      {
+        "description": "Krav A-U for bygge-, anleggs- og renholdsanskaffelser over 500 000 kr.",
+        "applies_to_codes": [
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "F",
+          "G",
+          "H",
+          "I",
+          "J",
+          "K",
+          "L",
+          "M",
+          "N",
+          "O",
+          "P",
+          "Q",
+          "R",
+          "S",
+          "T",
+          "U"
+        ],
+        "conditions": [
+          {
+            "field": "anskaffelsestype",
+            "operator": "in",
+            "value": [
+              "bygge",
+              "anleggs",
+              "renholds"
+            ]
+          },
+          {
+            "field": "kontraktsverdi",
+            "operator": ">",
+            "value": 500000
+          }
+        ]
+      },
+      {
+        "description": "Krav V for bygge-, anleggs- og renholdsanskaffelser over 500 000 kr når vilkårene er oppfylt (jf. punkt 6).",
+        "applies_to_codes": [
+          "V"
+        ],
+        "conditions": [
+          {
+            "field": "anskaffelsestype",
+            "operator": "in",
+            "value": [
+              "bygge",
+              "anleggs",
+              "renholds"
+            ]
+          },
+          {
+            "field": "kontraktsverdi",
+            "operator": ">",
+            "value": 500000
+          },
+          {
+            "field": "vilkår_punkt_6",
+            "operator": "=",
+            "value": true
+          }
+        ]
+      },
+      {
+        "description": "Krav A-H for tjenesteanskaffelser over 500 000 kr.",
+        "applies_to_codes": [
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "F",
+          "G",
+          "H"
+        ],
+        "conditions": [
+          {
+            "field": "anskaffelsestype",
+            "operator": "=",
+            "value": "tjeneste"
+          },
+          {
+            "field": "kontraktsverdi",
+            "operator": ">",
+            "value": 500000
+          }
+        ]
+      },
+      {
+        "description": "Krav I-T for tjenesteanskaffelser over 500 000 kr ved risiko for arbeidslivskriminalitet eller sosial dumping.",
+        "applies_to_codes": [
+          "I",
+          "J",
+          "K",
+          "L",
+          "M",
+          "N",
+          "O",
+          "P",
+          "Q",
+          "R",
+          "S",
+          "T"
+        ],
+        "conditions": [
+          {
+            "field": "anskaffelsestype",
+            "operator": "=",
+            "value": "tjeneste"
+          },
+          {
+            "field": "kontraktsverdi",
+            "operator": ">",
+            "value": 500000
+          },
+          {
+            "field": "risiko",
+            "operator": "in",
+            "value": [
+              "arbeidslivskriminalitet",
+              "sosial dumping"
+            ]
+          }
+        ]
+      },
+      {
+        "description": "Krav V for tjenesteanskaffelser over 500 000 kr når vilkårene er oppfylt (jf. punkt 6).",
+        "applies_to_codes": [
+          "V"
+        ],
+        "conditions": [
+          {
+            "field": "anskaffelsestype",
+            "operator": "=",
+            "value": "tjeneste"
+          },
+          {
+            "field": "kontraktsverdi",
+            "operator": ">",
+            "value": 500000
+          },
+          {
+            "field": "vilkår_punkt_6",
+            "operator": "=",
+            "value": true
+          }
+        ]
+      }
+    ],
+    "requirement_codes": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "F",
+      "G",
+      "H",
+      "I",
+      "J",
+      "K",
+      "L",
+      "M",
+      "N",
+      "O",
+      "P",
+      "Q",
+      "R",
+      "S",
+      "T",
+      "U",
+      "V"
+    ],
+    "risk_levels": [],
+    "value_thresholds": {
+      "seriositetskrav_nedre_grense": 100000,
+      "seriositetskrav_mellomgrense": 500000
+    },
+    "due_diligence_set": null,
+    "max_subcontractor_levels": null,
+    "subcontractor_conditions": [],
+    "apprentice_required": null,
+    "apprentice_threshold": null
+  },
+  {
+    "chunk_id": "Instruks_oslomodellen-18f4fb0b-a6b3-495d-b856-1d8d6d549b2e",
+    "source_document": "Instruks_oslomodellen.pdf",
+    "document_type": "instruks",
+    "title": "5. Begrensninger i bruk av underleverandører i vertikal kjede",
+    "content": "5. Begrensninger i bruk av underleverandører i vertikal kjede\n5.1 Ved kunngjøring av bygge-, anleggs- og tjenesteanskaffelser gjelder følgende adgang til \nbruk av underleverandører, jf. krav H: \na) I anskaffelser der det foreligger risiko for arbeidslivskriminalitet og sosial \ndumping kan det maksimalt tillates ett ledd underleverandører i vertikal kjede. \nb) I anskaffelser der det foreligger høy risiko for arbeidslivskriminalitet eller sosial \ndumping, kan det nektes bruk av underleverandører dersom det ikke er mulig å \nredusere risikoen med mindre inngripende tiltak.  \nc) I anskaffelser der det foreligger lav risiko for arbeidslivskriminalitet og sosial \ndumping, kan det åpnes for to ledd underleverandører i vertikal kjede.",
+    "summary": "Regler for begrensning av underleverandører i vertikal kjede for bygge-, anleggs- og tjenesteanskaffelser, basert på risiko for arbeidslivskriminalitet og sosial dumping. Ved moderat risiko tillates ett ledd, ved høy risiko kan bruk nektes, og ved lav risiko kan to ledd tillates.",
+    "source_page": 1,
+    "section_number": "5",
+    "parent_chunk_id": null,
+    "child_chunk_ids": [
+      "Instruks_oslomodellen-5cb433fe-1611-4bb6-a025-6b74ca39f858"
+    ],
+    "related_chunk_ids": [
+      "Instruks_oslomodellen-5cb433fe-1611-4bb6-a025-6b74ca39f858"
+    ],
+    "references_to_other_docs": [],
+    "status": "aktiv",
+    "version": "1.0",
+    "created_at": "2023-10-27T10:00:00Z",
+    "updated_at": "2023-10-27T10:00:00Z",
+    "keywords": [
+      "underleverandører",
+      "vertikal kjede",
+      "arbeidslivskriminalitet",
+      "sosial dumping",
+      "risiko",
+      "byggeanskaffelser",
+      "anleggsanskaffelser",
+      "tjenesteanskaffelser"
+    ],
+    "semantic_tags": [
+      "underleverandørstyring",
+      "risikovurdering",
+      "kontraktskrav"
+    ],
+    "confidence_score": 1.0,
+    "chunk_type": "regel",
+    "rule_sets": [
+      {
+        "rule_name": "Begrensning til ett ledd underleverandører ved moderat risiko",
+        "description": "I anskaffelser der det foreligger moderat risiko for arbeidslivskriminalitet og sosial dumping kan det maksimalt tillates ett ledd underleverandører i vertikal kjede.",
+        "applies_to_codes": [
+          "H"
+        ],
+        "conditions": [
+          {
+            "field": "risk_for_work_life_crime_or_social_dumping",
+            "operator": "=",
+            "value": "moderat"
+          }
+        ],
+        "consequences": [
+          {
+            "field": "max_subcontractor_levels",
+            "operator": "=",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "rule_name": "Nektelse av underleverandører ved høy risiko",
+        "description": "I anskaffelser der det foreligger høy risiko for arbeidslivskriminalitet eller sosial dumping, kan det nektes bruk av underleverandører dersom det ikke er mulig å redusere risikoen med mindre inngripende tiltak.",
+        "applies_to_codes": [
+          "H"
+        ],
+        "conditions": [
+          {
+            "field": "risk_for_work_life_crime_or_social_dumping",
+            "operator": "=",
+            "value": "høy"
+          }
+        ],
+        "consequences": [
+          {
+            "field": "subcontractor_use",
+            "operator": "=",
+            "value": "kan nektes dersom risiko ikke kan reduseres med mindre inngripende tiltak"
+          }
+        ]
+      },
+      {
+        "rule_name": "Tillatelse til to ledd underleverandører ved lav risiko",
+        "description": "I anskaffelser der det foreligger lav risiko for arbeidslivskriminalitet og sosial dumping, kan det åpnes for to ledd underleverandører i vertikal kjede.",
+        "applies_to_codes": [
+          "H"
+        ],
+        "conditions": [
+          {
+            "field": "risk_for_work_life_crime_or_social_dumping",
+            "operator": "=",
+            "value": "lav"
+          }
+        ],
+        "consequences": [
+          {
+            "field": "max_subcontractor_levels",
+            "operator": "=",
+            "value": 2
+          }
+        ]
+      }
+    ],
+    "requirement_codes": [
+      "H"
+    ],
+    "risk_levels": [
+      "lav",
+      "moderat",
+      "høy"
+    ],
+    "value_thresholds": {},
+    "due_diligence_set": null,
+    "max_subcontractor_levels": null,
+    "subcontractor_conditions": [],
+    "apprentice_required": null,
+    "apprentice_threshold": null
+  },
+  {
+    "chunk_id": "Instruks_oslomodellen-5cb433fe-1611-4bb6-a025-6b74ca39f858",
+    "source_document": "Instruks_oslomodellen.pdf",
+    "document_type": "instruks",
+    "title": "Unntak fra begrensninger i bruk av underleverandører",
+    "content": "d) Dersom det er nødvendig for å sikre tilstrekkelig konkurranse eller effektiv gjennomføring av kontrakten, kan det i konkurransen åpnes for bruk av flere ledd underleverandører enn det som fremgår ovenfor. Dette må imidlertid ikke skje i større utstrekning enn nødvendig eller det som følger av forskrift om offentlige anskaffelser. \n5.2 I kontraktsperioden kan det åpnes for bruk av flere ledd underleverandører enn det som fremgår av kontrakten, dersom det på grunn av uforutsette eller spesielle omstendigheter er nødvendig for å få gjennomført kontrakten. Dette må imidlertid ikke skje i større utstrekning enn nødvendig eller det som følger av forskrift om offentlige anskaffelser.",
+    "summary": "Beskriver betingelsene for å tillate bruk av flere ledd underleverandører enn det hovedregelen tilsier, både i konkurransefasen og i kontraktsperioden. Dette er tillatt for å sikre konkurranse, effektiv gjennomføring, eller ved uforutsette omstendigheter, og må følge forskrift om offentlige anskaffelser.",
+    "source_page": 2,
+    "section_number": "5.1d, 5.2",
+    "parent_chunk_id": "Instruks_oslomodellen-18f4fb0b-a6b3-495d-b856-1d8d6d549b2e",
+    "child_chunk_ids": [],
+    "related_chunk_ids": [
+      "Instruks_oslomodellen-18f4fb0b-a6b3-495d-b856-1d8d6d549b2e"
+    ],
+    "references_to_other_docs": [
+      "forskrift om offentlige anskaffelser"
+    ],
+    "status": "aktiv",
+    "version": "1.0",
+    "created_at": "2023-10-27T10:00:00Z",
+    "updated_at": "2023-10-27T10:00:00Z",
+    "keywords": [
+      "underleverandører",
+      "konkurranse",
+      "kontrakt",
+      "offentlige anskaffelser",
+      "unntak"
+    ],
+    "semantic_tags": [
+      "underleverandørstyring",
+      "kontraktsgjennomføring",
+      "anskaffelsesprosess"
+    ],
+    "confidence_score": 1.0,
+    "chunk_type": "regel",
+    "rule_sets": [
+      {
+        "rule_name": "Unntak for flere underleverandører i konkurransefasen",
+        "description": "Det kan åpnes for flere ledd underleverandører enn hovedregelen dersom det er nødvendig for å sikre tilstrekkelig konkurranse eller effektiv gjennomføring.",
+        "applies_to_codes": [
+          "H"
+        ],
+        "conditions": [
+          {
+            "field": "justification_for_more_subcontractors",
+            "operator": "in",
+            "value": [
+              "sikre_tilstrekkelig_konkurranse",
+              "sikre_effektiv_gjennomføring"
+            ]
+          }
+        ],
+        "consequences": [
+          {
+            "field": "subcontractor_levels_exception",
+            "operator": "=",
+            "value": "kan_tillates"
+          }
+        ]
+      },
+      {
+        "rule_name": "Unntak for flere underleverandører i kontraktsperioden",
+        "description": "Det kan åpnes for flere ledd underleverandører enn avtalt i kontrakten dersom uforutsette eller spesielle omstendigheter gjør det nødvendig for å gjennomføre kontrakten.",
+        "applies_to_codes": [
+          "H"
+        ],
+        "conditions": [
+          {
+            "field": "circumstances",
+            "operator": "in",
+            "value": [
+              "uforutsette",
+              "spesielle"
+            ]
+          },
+          {
+            "field": "necessity",
+            "operator": "=",
+            "value": "nødvendig_for_kontraktsgjennomføring"
+          }
+        ],
+        "consequences": [
+          {
+            "field": "subcontractor_levels_exception",
+            "operator": "=",
+            "value": "kan_tillates"
+          }
+        ]
+      }
+    ],
+    "requirement_codes": [
+      "H"
+    ],
+    "risk_levels": [],
+    "value_thresholds": {},
+    "due_diligence_set": null,
+    "max_subcontractor_levels": null,
+    "subcontractor_conditions": [],
+    "apprentice_required": null,
+    "apprentice_threshold": null
+  },
+  {
+    "chunk_id": "Instruks_oslomodellen-704b1a5a-d764-4a2e-b972-fba86726276e",
+    "source_document": "Instruks_oslomodellen.pdf",
+    "document_type": "instruks",
+    "title": "6. Krav til bruk av lærlinger",
+    "content": "6. Krav til bruk av lærlinger\nI anskaffelser over statlig terskelverdi for bruk av lærlinger, med varighet over tre måneder og \ninnenfor utførende fagområder med særlig behov for læreplasser, skal det stilles krav til bruk \nav lærlinger, jf. krav V.",
+    "summary": "Krav om bruk av lærlinger skal stilles i anskaffelser over statlig terskelverdi, med varighet over tre måneder, og innenfor utførende fagområder med særlig behov for læreplasser, jf. krav V.",
+    "source_page": 2,
+    "section_number": "6",
+    "parent_chunk_id": null,
+    "child_chunk_ids": [],
+    "related_chunk_ids": [],
+    "references_to_other_docs": [],
+    "status": "aktiv",
+    "version": "1.0",
+    "created_at": "2023-10-27T10:00:00Z",
+    "updated_at": "2023-10-27T10:00:00Z",
+    "keywords": [
+      "lærlinger",
+      "krav",
+      "anskaffelser",
+      "terskelverdi",
+      "varighet",
+      "fagområder"
+    ],
+    "semantic_tags": [
+      "lærlingekrav",
+      "anskaffelsesregel",
+      "terskelverdi"
+    ],
+    "confidence_score": 1.0,
+    "chunk_type": "regel",
+    "rule_sets": [
+      {
+        "rule_name": "Krav om lærlinger ved gitte vilkår",
+        "description": "Krav om bruk av lærlinger skal stilles når anskaffelsen er over statlig terskelverdi, varer over tre måneder, og er innenfor definerte fagområder.",
+        "applies_to_codes": [
+          "V"
+        ],
+        "conditions": [
+          {
+            "field": "anskaffelsesverdi",
+            "operator": ">",
+            "value": "statlig_terskelverdi_lærlinger"
+          },
+          {
+            "field": "varighet_måneder",
+            "operator": ">",
+            "value": 3
+          },
+          {
+            "field": "fagområde",
+            "operator": "in",
+            "value": [
+              "utførende fagområder med særlig behov for læreplasser"
+            ]
+          }
+        ],
+        "consequences": [
+          {
+            "field": "apprentice_required",
+            "operator": "=",
+            "value": true
+          }
+        ]
+      }
+    ],
+    "requirement_codes": [
+      "V"
+    ],
+    "risk_levels": [],
+    "value_thresholds": {
+      "statlig_terskelverdi_lærlinger": null
+    },
+    "due_diligence_set": null,
+    "max_subcontractor_levels": null,
+    "subcontractor_conditions": [],
+    "apprentice_required": null,
+    "apprentice_threshold": null
+  },
+  {
+    "chunk_id": "Instruks_oslomodellen-023d6d67-c198-4b3b-b503-ce2a27212669",
+    "source_document": "Instruks_oslomodellen.pdf",
+    "document_type": "instruks",
+    "title": "Oslomodellens krav til aktsomhetsvurderinger for ansvarlig næringsliv",
+    "content": "7. Oslomodellens krav til aktsomhetsvurderinger for ansvarlig næringsliv\n7.1 I alle anskaffelser skal det foretas en vurdering av risiko for brudd på grunnleggende \nmenneskerettigheter, arbeidstakerrettigheter og internasjonal humanitærrett, \nmiljøødeleggelse eller korrupsjon i leverandørkjeden eller andre forhold som tilsier at \nleverandøren ikke bør benyttes.\n7.2 Oslo kommune skal ikke handle med leverandører hvis aktiviteter kan knyttes til \nalvorlige brudd på grunnleggende menneskerettigheter, arbeidstakerrettigheter eller \ninternasjonal humanitærrett, eller alvorlige miljøødeleggelser eller korrupsjon. Dette \nomfatter også at kommunen ikke skal handle med leverandører som direkte eller \nindirekte medvirker til å opprettholde ulovlig okkupasjon.\n7.3 Kravsett A, Alminnelige krav til aktsomhetsvurderinger for ansvarlig næringsliv \nbenyttes i anskaffelser av varer, tjenester, bygg og anlegg over kr 500 000, der det er \nhøy risiko, jf. punkt 7.1.   \n7.4 Kravsett B, Forenklede krav til aktsomhetsvurderinger for ansvarlig næringsliv kan \nbenyttes i anskaffelser av varer, tjenester, bygg og anlegg over kr 500 000, der det er \nhøy risiko, jf. punkt 7.1, istedenfor kravsett A, ved enkeltkjøp av varer, bygge-, anleggs- \nog tjenestekontrakter med en varighet på under 1 år eller når markedsundersøkelse \nviser at færre enn tre potensielle tilbydere kan oppfylle de alminnelige kravene til \naktsomhetsvurderinger for ansvarlig næringsliv (umodent marked).\n7.5 Dersom vilkårene for bruk av kravsett B er oppfylt, skal virksomhetene dokumentere \nvurderingen i kontraktsstrategien eller tilsvarende dokument. \n7.6 Virksomhetene kan benytte strengere kvalifikasjons- eller kontraktskrav enn det som er \npålagt der dette er hensiktsmessig. Kravene som stilles må være forholdsmessige.",
+    "summary": "Oslomodellen krever aktsomhetsvurderinger i alle anskaffelser for å identifisere risiko for brudd på menneskerettigheter, arbeidstakerrettigheter, humanitærrett, miljø og korrupsjon. Oslo kommune skal ikke handle med leverandører involvert i alvorlige brudd eller ulovlig okkupasjon. Kravsett A brukes for anskaffelser over 500 000 kr med høy risiko. Kravsett B kan brukes som et forenklet alternativ under lignende forhold, men med tilleggskrav som kontraktvarighet under 1 år eller umodent marked. Bruk av Kravsett B krever dokumentasjon, og strengere krav kan benyttes om hensiktsmessig og forholdsmessig.",
+    "source_page": 2,
+    "section_number": "7",
+    "parent_chunk_id": null,
+    "child_chunk_ids": [],
+    "related_chunk_ids": [],
+    "references_to_other_docs": [],
+    "status": "aktiv",
+    "version": "1.0",
+    "created_at": "2023-10-27T10:00:00Z",
+    "updated_at": "2023-10-27T10:00:00Z",
+    "keywords": [
+      "Oslomodellen",
+      "aktsomhetsvurdering",
+      "ansvarlig næringsliv",
+      "risiko",
+      "leverandørkjede",
+      "menneskerettigheter",
+      "arbeidstakerrettigheter",
+      "humanitærrett",
+      "miljøødeleggelse",
+      "korrupsjon",
+      "anskaffelser",
+      "Kravsett A",
+      "Kravsett B",
+      "kontraktsverdi",
+      "dokumentasjon"
+    ],
+    "semantic_tags": [
+      "due diligence",
+      "supply chain",
+      "ESG",
+      "procurement",
+      "risk management",
+      "human rights",
+      "environmental protection",
+      "anti-corruption"
+    ],
+    "confidence_score": 1.0,
+    "chunk_type": "regel",
+    "rule_sets": [
+      {
+        "rule_id": "7.1",
+        "description": "I alle anskaffelser skal det foretas en vurdering av risiko for brudd på grunnleggende menneskerettigheter, arbeidstakerrettigheter og internasjonal humanitærrett, miljøødeleggelse eller korrupsjon i leverandørkjeden eller andre forhold som tilsier at leverandøren ikke bør benyttes.",
+        "applies_to_codes": [],
+        "conditions": [],
+        "due_diligence_set": "generell_vurdering"
+      },
+      {
+        "rule_id": "7.2",
+        "description": "Oslo kommune skal ikke handle med leverandører hvis aktiviteter kan knyttes til alvorlige brudd på grunnleggende menneskerettigheter, arbeidstakerrettigheter eller internasjonal humanitærrett, eller alvorlige miljøødeleggelser eller korrupsjon. Dette omfatter også at kommunen ikke skal handle med leverandører som direkte eller indirekte medvirker til å opprettholde ulovlig okkupasjon.",
+        "applies_to_codes": [],
+        "conditions": [],
+        "due_diligence_set": null
+      },
+      {
+        "rule_id": "7.3",
+        "description": "Kravsett A, Alminnelige krav til aktsomhetsvurderinger for ansvarlig næringsliv benyttes i anskaffelser av varer, tjenester, bygg og anlegg over kr 500 000, der det er høy risiko, jf. punkt 7.1.",
+        "applies_to_codes": [
+          "A"
+        ],
+        "conditions": [
+          {
+            "field": "kontraktsverdi",
+            "operator": ">",
+            "value": 500000
+          },
+          {
+            "field": "risikonivå",
+            "operator": "=",
+            "value": "høy"
+          }
+        ],
+        "due_diligence_set": "kravsett_a"
+      },
+      {
+        "rule_id": "7.4",
+        "description": "Kravsett B, Forenklede krav til aktsomhetsvurderinger for ansvarlig næringsliv kan benyttes istedenfor kravsett A under visse vilkår.",
+        "applies_to_codes": [
+          "B"
+        ],
+        "conditions": [
+          {
+            "field": "kontraktsverdi",
+            "operator": ">",
+            "value": 500000
+          },
+          {
+            "field": "risikonivå",
+            "operator": "=",
+            "value": "høy"
+          },
+          {
+            "any_of": [
+              {
+                "description": "Enkeltkjøp, eller bygge-, anleggs- og tjenestekontrakter med varighet under 1 år",
+                "field": "kontraktsvarighet_år",
+                "operator": "<",
+                "value": 1
+              },
+              {
+                "description": "Markedsundersøkelse viser færre enn tre potensielle tilbydere (umodent marked)",
+                "field": "markedssituasjon",
+                "operator": "=",
+                "value": "umodent marked"
+              }
+            ]
+          }
+        ],
+        "due_diligence_set": "kravsett_b"
+      },
+      {
+        "rule_id": "7.5",
+        "description": "Dersom vilkårene for bruk av kravsett B er oppfylt, skal virksomhetene dokumentere vurderingen i kontraktsstrategien eller tilsvarende dokument.",
+        "applies_to_codes": [
+          "B"
+        ],
+        "conditions": [
+          {
+            "description": "Vilkårene for bruk av kravsett B er oppfylt",
+            "field": "kravsett_b_vilkår_oppfylt",
+            "operator": "=",
+            "value": true
+          }
+        ],
+        "due_diligence_set": null
+      },
+      {
+        "rule_id": "7.6",
+        "description": "Virksomhetene kan benytte strengere kvalifikasjons- eller kontraktskrav enn det som er pålagt der dette er hensiktsmessig. Kravene som stilles må være forholdsmessige.",
+        "applies_to_codes": [],
+        "conditions": [],
+        "due_diligence_set": null
+      }
+    ],
+    "requirement_codes": [
+      "A",
+      "B"
+    ],
+    "risk_levels": [
+      "høy"
+    ],
+    "value_thresholds": {
+      "kontraktsverdi": 500000
+    },
+    "due_diligence_set": null,
+    "max_subcontractor_levels": null,
+    "subcontractor_conditions": [],
+    "apprentice_required": null,
+    "apprentice_threshold": null
+  },
+  {
+    "chunk_id": "Instruks_oslomodellen-df6b6c2a-d5ff-4a5b-afe3-816d909ba7ca",
+    "source_document": "Instruks_oslomodellen.pdf",
+    "document_type": "instruks",
+    "title": "Reserverte kontrakter",
+    "content": "8. Reserverte kontrakter\n8.1 Det skal alltid gjennomføres konkurranse om reservert kontrakt ved anskaffelser innen \nfølgende områder: \na) Trykking, kopiering og ferdigstilling av grafisk materiell",
+    "summary": "Regel om at konkurranse alltid skal gjennomføres for reserverte kontrakter innen spesifikke områder som trykking, kopiering og ferdigstilling av grafisk materiell.",
+    "source_page": 2,
+    "section_number": "8.1",
+    "parent_chunk_id": null,
+    "child_chunk_ids": [],
+    "related_chunk_ids": [
+      "Instruks_oslomodellen-8ec2ceb4-ee9b-4f1f-a275-c0239a9a369d"
+    ],
+    "references_to_other_docs": [],
+    "status": "aktiv",
+    "version": "1.0",
+    "created_at": "2023-10-27T10:00:00Z",
+    "updated_at": "2023-10-27T10:00:00Z",
+    "keywords": [
+      "reserverte kontrakter",
+      "konkurranse",
+      "anskaffelser",
+      "trykking",
+      "kopiering",
+      "grafisk materiell"
+    ],
+    "semantic_tags": [
+      "anskaffelsesprosess",
+      "kontraktsstyring",
+      "offentlige anskaffelser"
+    ],
+    "confidence_score": 1.0,
+    "chunk_type": "regel",
+    "rule_sets": [
+      {
+        "rule_id": "8.1a",
+        "description": "Det skal alltid gjennomføres konkurranse om reservert kontrakt ved anskaffelser innen trykking, kopiering og ferdigstilling av grafisk materiell.",
+        "applies_to_codes": [],
+        "conditions": [
+          {
+            "field": "kontraktstype",
+            "operator": "=",
+            "value": "reservert"
+          },
+          {
+            "field": "anskaffelsesområde",
+            "operator": "=",
+            "value": "Trykking, kopiering og ferdigstilling av grafisk materiell"
+          }
+        ],
+        "outcome": "Det skal alltid gjennomføres konkurranse."
+      }
+    ],
+    "requirement_codes": [],
+    "risk_levels": [],
+    "value_thresholds": {},
+    "due_diligence_set": null,
+    "max_subcontractor_levels": null,
+    "subcontractor_conditions": [],
+    "apprentice_required": null,
+    "apprentice_threshold": null
+  },
+  {
+    "chunk_id": "Instruks_oslomodellen-8ec2ceb4-ee9b-4f1f-a275-c0239a9a369d",
+    "source_document": "Instruks_oslomodellen.pdf",
+    "document_type": "instruks",
+    "title": "Regler for reserverte kontrakter og samkjøpsavtaler",
+    "content": "b) Pakking, emballering, konvoluttering og masseutsendelse\nc) Fruktordninger (fruktabonnement)\n8.2 Det skal vurderes om anskaffelsen skal gjennomføres som konkurranse om reservert \nkontrakt eller om det skal utlyses en ordinær konkurranse innen følgende områder:\na) Catering\nb) Dekkhotell\nc) Distribusjon/transportoppdrag og fast, rutinemessig transport\nd) Enkle monteringsoppdrag\ne) Produksjon av skilt\nf) Søm/reparasjoner/tekstiltrykk\n8.3 Utviklings- og kompetanseetaten skal gjennomføre konkurranse om reserverte \nkontrakter på de områder som følger av punkt 8.1 og 8.2. Reserverte kontrakter skal \ninngås som en samkjøpsavtale, og virksomhetene plikter å benytte samkjøpsavtalene. \nDersom det ikke er marked for reservert kontrakt, kan Utviklings- og kompetanseetaten \ngjennomføre anskaffelsen som en ordinær konkurranse i henhold til regelverket om \noffentlige anskaffelser. \n8.4 Virksomhetene kan inngå egne reserverte kontrakter der det ikke foreligger \nsamkjøpsavtaler.",
+    "summary": "Denne teksten beskriver regler for anskaffelse av reserverte kontrakter og bruk av samkjøpsavtaler i Oslo kommune. Den spesifiserer områder hvor reserverte kontrakter skal vurderes eller gjennomføres, og plikten til å benytte samkjøpsavtaler. Unntak og muligheter for egne kontrakter er også inkludert.",
+    "source_page": 3,
+    "section_number": "8.1-8.4",
+    "parent_chunk_id": null,
+    "child_chunk_ids": [],
+    "related_chunk_ids": [
+      "Instruks_oslomodellen-df6b6c2a-d5ff-4a5b-afe3-816d909ba7ca"
+    ],
+    "references_to_other_docs": [],
+    "status": "aktiv",
+    "version": "1.0",
+    "created_at": "2023-10-27T10:00:00Z",
+    "updated_at": "2023-10-27T10:00:00Z",
+    "keywords": [
+      "reservert kontrakt",
+      "samkjøpsavtale",
+      "anskaffelse",
+      "offentlige anskaffelser",
+      "Oslo-modellen",
+      "catering",
+      "transport",
+      "montering",
+      "skilt",
+      "søm",
+      "pakking",
+      "fruktordning"
+    ],
+    "semantic_tags": [
+      "anskaffelsesprosess",
+      "kontraktsstyring",
+      "offentlige anskaffelser"
+    ],
+    "confidence_score": 1.0,
+    "chunk_type": "regel",
+    "rule_sets": [
+      {
+        "rule_id": "8.1b-c",
+        "description": "Det skal alltid gjennomføres konkurranse om reservert kontrakt for spesifikke områder.",
+        "applies_to_codes": [],
+        "conditions": [
+          {
+            "field": "anskaffelsesområde",
+            "operator": "in",
+            "value": [
+              "Pakking, emballering, konvoluttering og masseutsendelse",
+              "Fruktordninger (fruktabonnement)"
+            ]
+          }
+        ],
+        "outcome": "Det skal alltid gjennomføres konkurranse om reservert kontrakt."
+      },
+      {
+        "rule_id": "8.2",
+        "description": "Vurdering av anskaffelse som reservert kontrakt eller ordinær konkurranse for spesifikke områder.",
+        "applies_to_codes": [],
+        "conditions": [
+          {
+            "field": "anskaffelsesområde",
+            "operator": "in",
+            "value": [
+              "Catering",
+              "Dekkhotell",
+              "Distribusjon/transportoppdrag og fast, rutinemessig transport",
+              "Enkle monteringsoppdrag",
+              "Produksjon av skilt",
+              "Søm/reparasjoner/tekstiltrykk"
+            ]
+          }
+        ],
+        "outcome": "Det skal vurderes om anskaffelsen skal gjennomføres som konkurranse om reservert kontrakt eller om det skal utlyses en ordinær konkurranse."
+      },
+      {
+        "rule_id": "8.3",
+        "description": "Krav om gjennomføring av konkurranse om reserverte kontrakter og plikt til å benytte samkjøpsavtaler.",
+        "applies_to_codes": [],
+        "conditions": [
+          {
+            "description": "Anskaffelsen gjelder områder som følger av punkt 8.1 og 8.2.",
+            "field": "referanse_til_regelverk",
+            "operator": "in",
+            "value": [
+              "8.1",
+              "8.2"
+            ]
+          }
+        ],
+        "outcome": "Utviklings- og kompetanseetaten skal gjennomføre konkurranse om reserverte kontrakter. Reserverte kontrakter skal inngås som en samkjøpsavtale, og virksomhetene plikter å benytte samkjøpsavtalene.",
+        "exception": {
+          "description": "Dersom det ikke er marked for reservert kontrakt",
+          "outcome": "Utviklings- og kompetanseetaten kan gjennomføre anskaffelsen som en ordinær konkurranse i henhold til regelverket om offentlige anskaffelser."
+        }
+      },
+      {
+        "rule_id": "8.4",
+        "description": "Mulighet for virksomheter til å inngå egne reserverte kontrakter der samkjøpsavtaler ikke foreligger.",
+        "applies_to_codes": [],
+        "conditions": [
+          {
+            "description": "Det foreligger ikke samkjøpsavtaler.",
+            "field": "samkjøpsavtale_eksisterer",
+            "operator": "=",
+            "value": false
+          }
+        ],
+        "outcome": "Virksomhetene kan inngå egne reserverte kontrakter."
+      }
+    ],
+    "requirement_codes": [],
+    "risk_levels": [],
+    "value_thresholds": {},
+    "due_diligence_set": null,
+    "max_subcontractor_levels": null,
+    "subcontractor_conditions": [],
+    "apprentice_required": null,
+    "apprentice_threshold": null
+  },
+  {
+    "chunk_id": "Instruks_oslomodellen-ce431d54-fd07-4621-8b25-068b7f084d8a",
+    "source_document": "Instruks_oslomodellen.pdf",
+    "document_type": "instruks",
+    "title": "Oppfølging av kontrakter",
+    "content": "9. Oppfølging av kontrakter\n9.1 Virksomhetene skal iverksette nødvendige tiltak for å styrke oppfølgingen av \nOslomodellens seriøsitetskrav og krav til aktsomhetsvurderinger for ansvarlig \nnæringsliv. \n9.2 Virksomhetene skal utarbeide rutiner for bruk av sanksjoner som skal følges ved \nmangelfull kontraktsoppfyllelse fra leverandøren.",
+    "summary": "Dette avsnittet beskriver to hovedkrav for virksomheter: å styrke oppfølgingen av Oslomodellens seriøsitetskrav og aktsomhetsvurderinger for ansvarlig næringsliv, samt å utarbeide rutiner for sanksjoner ved mangelfull kontraktsoppfyllelse fra leverandører.",
+    "source_page": 3,
+    "section_number": "9",
+    "parent_chunk_id": null,
+    "child_chunk_ids": [],
+    "related_chunk_ids": [
+      "Instruks_oslomodellen-23982a4a-52dc-4187-b853-9d8b9d03a7ac",
+      "Instruks_oslomodellen-0abceaaf-de4f-40e5-8c7c-047d93296cc8"
+    ],
+    "references_to_other_docs": [],
+    "status": "aktiv",
+    "version": "1.0",
+    "created_at": "2023-10-27T10:00:00Z",
+    "updated_at": "2023-10-27T10:00:00Z",
+    "keywords": [
+      "Oppfølging",
+      "kontrakter",
+      "Oslomodellen",
+      "seriøsitetskrav",
+      "aktsomhetsvurderinger",
+      "ansvarlig næringsliv",
+      "rutiner",
+      "sanksjoner",
+      "kontraktsoppfyllelse",
+      "leverandør"
+    ],
+    "semantic_tags": [
+      "Kontraktsoppfølging",
+      "seriøsitet",
+      "aktsomhetsvurdering",
+      "sanksjoner",
+      "leverandørstyring"
+    ],
+    "confidence_score": 1.0,
+    "chunk_type": "regel",
+    "rule_sets": [
+      {
+        "rule_name": "Oppfølging av seriøsitetskrav og aktsomhetsvurderinger",
+        "description": "Virksomhetene skal iverksette nødvendige tiltak for å styrke oppfølgingen av Oslomodellens seriøsitetskrav og krav til aktsomhetsvurderinger for ansvarlig næringsliv.",
+        "applies_to_codes": [],
+        "conditions": [],
+        "consequences": [],
+        "guidance": [],
+        "legal_references": [],
+        "source_section": "9.1"
+      },
+      {
+        "rule_name": "Rutiner for sanksjoner ved mangelfull kontraktsoppfyllelse",
+        "description": "Virksomhetene skal utarbeide rutiner for bruk av sanksjoner som skal følges ved mangelfull kontraktsoppfyllelse fra leverandøren.",
+        "applies_to_codes": [],
+        "conditions": [],
+        "consequences": [],
+        "guidance": [],
+        "legal_references": [],
+        "source_section": "9.2"
+      }
+    ],
+    "requirement_codes": [],
+    "risk_levels": [],
+    "value_thresholds": {},
+    "due_diligence_set": "generell_vurdering",
+    "max_subcontractor_levels": null,
+    "subcontractor_conditions": [],
+    "apprentice_required": null,
+    "apprentice_threshold": null
+  },
+  {
+    "chunk_id": "Instruks_oslomodellen-23982a4a-52dc-4187-b853-9d8b9d03a7ac",
+    "source_document": "Instruks_oslomodellen.pdf",
+    "document_type": "instruks",
+    "title": "HMSREG",
+    "content": "10. HMSREG\n10.1 Virksomhetene skal benytte HMSREG i kontraktsoppfølging for kontrakter der det er \nstilt krav om bruk av HMS-kort. \n10.2 Virksomhetene skal følge opp at mannskapslister blir korrekt fylt ut og oppdatert. \n10.3 Virksomhetene skal fortløpende behandle alle hendelser i HMSREG. Alvorlige hendelser \nskal kommenteres i systemet for å vise hva som er gjort for å lukke hendelsen.\n10.4 Virksomhetene skal benytte seg av funksjonaliteten for stedlig kontroll når de foretar \nkontroller. Det utarbeides en rapport etter kontrollen.\n10.5 Utviklings- og kompetanseetaten kan, basert på risikovurderinger, gjennomføre \nkontroller på alle kommunens oppdragslokasjoner registrert i HMSREG. Aktuell \noppdragsgiver skal, så langt det er mulig, informeres på forhånd.",
+    "summary": "Dette avsnittet beskriver krav og retningslinjer for bruk av HMSREG-systemet i kontraktsoppfølging. Det inkluderer krav om bruk ved HMS-kortkrav, oppfølging av mannskapslister, hendelsesbehandling, bruk av stedlig kontrollfunksjonalitet, og muligheten for Utviklings- og kompetanseetaten til å gjennomføre risikobaserte kontroller.",
+    "source_page": 3,
+    "section_number": "10",
+    "parent_chunk_id": null,
+    "child_chunk_ids": [],
+    "related_chunk_ids": [
+      "Instruks_oslomodellen-ce431d54-fd07-4621-8b25-068b7f084d8a",
+      "Instruks_oslomodellen-0abceaaf-de4f-40e5-8c7c-047d93296cc8"
+    ],
+    "references_to_other_docs": [],
+    "status": "aktiv",
+    "version": "1.0",
+    "created_at": "2023-10-27T10:00:00Z",
+    "updated_at": "2023-10-27T10:00:00Z",
+    "keywords": [
+      "HMSREG",
+      "HMS-kort",
+      "kontraktsoppfølging",
+      "mannskapslister",
+      "hendelsesbehandling",
+      "stedlig kontroll",
+      "risikovurdering",
+      "kontroller"
+    ],
+    "semantic_tags": [
+      "HMS",
+      "Kontraktsoppfølging",
+      "systembruk",
+      "risikostyring"
+    ],
+    "confidence_score": 1.0,
+    "chunk_type": "regel",
+    "rule_sets": [
+      {
+        "rule_name": "Bruk av HMSREG ved HMS-kortkrav",
+        "description": "Virksomhetene skal benytte HMSREG i kontraktsoppfølging for kontrakter der det er stilt krav om bruk av HMS-kort.",
+        "source_section": "10.1",
+        "conditions": [
+          {
+            "description": "Krav om bruk av HMS-kort er stilt.",
+            "field": "HMS_kort_krav",
+            "operator": "=",
+            "value": true
+          }
+        ],
+        "applies_to_codes": []
+      },
+      {
+        "rule_name": "Oppfølging av mannskapslister",
+        "description": "Virksomhetene skal følge opp at mannskapslister blir korrekt fylt ut og oppdatert.",
+        "source_section": "10.2",
+        "conditions": [],
+        "applies_to_codes": []
+      },
+      {
+        "rule_name": "Behandling av hendelser i HMSREG",
+        "description": "Virksomhetene skal fortløpende behandle alle hendelser i HMSREG. Alvorlige hendelser skal kommenteres i systemet for å vise hva som er gjort for å lukke hendelsen.",
+        "source_section": "10.3",
+        "conditions": [
+          {
+            "description": "Hendelsestype er alvorlig.",
+            "field": "hendelsestype",
+            "operator": "=",
+            "value": "alvorlig"
+          }
+        ],
+        "applies_to_codes": []
+      },
+      {
+        "rule_name": "Bruk av stedlig kontroll i HMSREG",
+        "description": "Virksomhetene skal benytte seg av funksjonaliteten for stedlig kontroll når de foretar kontroller. Det utarbeides en rapport etter kontrollen.",
+        "source_section": "10.4",
+        "conditions": [],
+        "applies_to_codes": []
+      },
+      {
+        "rule_name": "Sentral kontroll fra Utviklings- og kompetanseetaten",
+        "description": "Utviklings- og kompetanseetaten kan, basert på risikovurderinger, gjennomføre kontroller på alle kommunens oppdragslokasjoner registrert i HMSREG. Aktuell oppdragsgiver skal, så langt det er mulig, informeres på forhånd.",
+        "source_section": "10.5",
+        "conditions": [
+          {
+            "description": "Kontroll er basert på risikovurderinger.",
+            "field": "kontroll_grunnlag",
+            "operator": "=",
+            "value": "risikovurdering"
+          }
+        ],
+        "applies_to_codes": []
+      }
+    ],
+    "requirement_codes": [],
+    "risk_levels": [
+      "lav",
+      "moderat",
+      "høy"
+    ],
+    "value_thresholds": {},
+    "due_diligence_set": null,
+    "max_subcontractor_levels": null,
+    "subcontractor_conditions": [],
+    "apprentice_required": null,
+    "apprentice_threshold": null
+  },
+  {
+    "chunk_id": "Instruks_oslomodellen-0abceaaf-de4f-40e5-8c7c-047d93296cc8",
+    "source_document": "Instruks_oslomodellen.pdf",
+    "document_type": "instruks",
+    "title": "Merking og informasjon",
+    "content": "11. Merking og informasjon\n11.1 Virksomhetene skal påse at alle bygge- og anleggsplasser der kommunen er byggherre, \ner tydelig merket med Oslo kommunes logo. \n11.2 Virksomhetene skal oversende informasjonsmateriell til leverandøren. \nInformasjonsmaterialet skal informere om Oslomodellen, og muligheten til å \nfagorganisere seg, samt kontaktinformasjon som kan benyttes for å melde fra om \nuregelmessigheter. \n11.3 Utviklings- og kompetanseetaten utarbeider informasjonsmateriell som kan benyttes av \nvirksomhetene.",
+    "summary": "Dette avsnittet beskriver krav til merking av bygge- og anleggsplasser med Oslo kommunes logo, samt krav om å oversende informasjonsmateriell til leverandører om Oslomodellen, fagorganisering og rapportering av uregelmessigheter. Utviklings- og kompetanseetaten er ansvarlig for å utarbeide dette materiellet.",
+    "source_page": 4,
+    "section_number": "11",
+    "parent_chunk_id": null,
+    "child_chunk_ids": [],
+    "related_chunk_ids": [
+      "Instruks_oslomodellen-ce431d54-fd07-4621-8b25-068b7f084d8a",
+      "Instruks_oslomodellen-23982a4a-52dc-4187-b853-9d8b9d03a7ac"
+    ],
+    "references_to_other_docs": [],
+    "status": "aktiv",
+    "version": "1.0",
+    "created_at": "2023-10-27T10:00:00Z",
+    "updated_at": "2023-10-27T10:00:00Z",
+    "keywords": [
+      "merking",
+      "informasjon",
+      "byggeplass",
+      "anleggsplass",
+      "Oslo kommune",
+      "logo",
+      "byggherre",
+      "leverandør",
+      "Oslomodellen",
+      "fagorganisering",
+      "uregelmessigheter",
+      "Utviklings- og kompetanseetaten"
+    ],
+    "semantic_tags": [
+      "Informasjonsplikt",
+      "Merking",
+      "Byggeplass",
+      "Leverandørinformasjon"
+    ],
+    "confidence_score": 1.0,
+    "chunk_type": "regel",
+    "rule_sets": [
+      {
+        "rule_name": "Merking av bygge- og anleggsplasser",
+        "description": "Krav om tydelig merking av bygge- og anleggsplasser med Oslo kommunes logo.",
+        "source_section": "11.1",
+        "applies_to_codes": [],
+        "conditions": [
+          {
+            "field": "byggherre",
+            "operator": "=",
+            "value": "Oslo kommune"
+          }
+        ]
+      },
+      {
+        "rule_name": "Informasjonsplikt overfor leverandør",
+        "description": "Krav om å oversende informasjonsmateriell til leverandøren som informerer om Oslomodellen, fagorganisering, og kontaktinformasjon for melding om uregelmessigheter.",
+        "source_section": "11.2",
+        "applies_to_codes": [],
+        "conditions": []
+      },
+      {
+        "rule_name": "Utarbeidelse av informasjonsmateriell",
+        "description": "Utviklings- og kompetanseetaten er ansvarlig for å utarbeide informasjonsmateriell som kan benyttes av virksomhetene.",
+        "source_section": "11.3",
+        "applies_to_codes": [],
+        "conditions": []
+      }
+    ],
+    "requirement_codes": [],
+    "risk_levels": [],
+    "value_thresholds": {},
+    "due_diligence_set": null,
+    "max_subcontractor_levels": null,
+    "subcontractor_conditions": [],
+    "apprentice_required": null,
+    "apprentice_threshold": null
+  },
+  {
+    "chunk_id": "Instruks_oslomodellen-3f6f1259-ce09-4d4d-8c57-2be3b5e1a212",
+    "source_document": "Instruks_oslomodellen.pdf",
+    "document_type": "instruks",
+    "title": "12. Veiledning",
+    "content": "12. Veiledning\n12.1 Utviklings- og kompetanseetaten utarbeider og forvalter veiledning til Oslomodellen.\n12.2 Virksomhetene skal legge veiledningen til grunn så langt den passer.",
+    "summary": "Denne seksjonen beskriver at Utviklings- og kompetanseetaten utarbeider og forvalter veiledning til Oslomodellen, og at virksomhetene skal legge denne veiledningen til grunn så langt den passer.",
+    "source_page": 4,
+    "section_number": "12",
+    "parent_chunk_id": null,
+    "child_chunk_ids": [],
+    "related_chunk_ids": [],
+    "references_to_other_docs": [],
+    "status": "aktiv",
+    "version": "1.0",
+    "created_at": "2023-10-27T10:00:00Z",
+    "updated_at": "2023-10-27T10:00:00Z",
+    "keywords": [
+      "veiledning",
+      "Oslomodellen",
+      "Utviklings- og kompetanseetaten",
+      "virksomheter"
+    ],
+    "semantic_tags": [],
+    "confidence_score": 1.0,
+    "chunk_type": "veiledning",
+    "rule_sets": [
+      {
+        "rule_name": "Bruk av veiledning",
+        "description": "Virksomhetene skal legge veiledningen til grunn så langt den passer.",
+        "source_section": "12.2",
+        "applies_to_codes": [],
+        "conditions": []
+      }
+    ],
+    "requirement_codes": [],
+    "risk_levels": [],
+    "value_thresholds": {},
+    "due_diligence_set": null,
+    "max_subcontractor_levels": null,
+    "subcontractor_conditions": [],
+    "apprentice_required": null,
+    "apprentice_threshold": null
+  }
+]

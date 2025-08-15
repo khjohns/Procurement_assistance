@@ -91,13 +91,13 @@ class LLMGateway:
             "deep_thinking": {
                 "temperature": 0.1,
                 "max_retries": 1,  # Expensive, fewer retries
-                "timeout": 120.0,
+                "timeout": 180.0,
                 "thinking_budget": 32768  # Maximum thinking
             },
             "default": {
                 "temperature": 0.3,
                 "max_retries": 3,
-                "timeout": 30.0,
+                "timeout": 60.0,
                 "thinking_budget": 16384
             }
         }

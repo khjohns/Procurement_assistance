@@ -254,7 +254,7 @@ async def test_multi_agent_goal(orchestrator: ReasoningOrchestrator, reporter: T
                     "name": "Rehabilitering av skolebygg",
                     "value": 15000000,
                     "description": "Total rehabilitering av Nordre skole, inkludert nytt ventilasjonsanlegg",
-                    "category": "construction",
+                    "category": "bygge",
                     "duration_months": 18,
                     "includes_construction": True
                 }
