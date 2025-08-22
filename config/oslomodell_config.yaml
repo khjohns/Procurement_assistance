@@ -1,0 +1,122 @@
+# ==============================================================================
+# Konfigurasjonsfil for Oslomodell-agenten
+# ==============================================================================
+# Denne filen styrer oppførselen til Oslomodell-agenten og dens spesialist-
+# komponenter. Alle innstillinger er samlet her for enkelt vedlikehold.
+# ------------------------------------------------------------------------------
+
+# 1. Kunnskapsbase
+# -----------------
+# Definerer hvor agenten skal hente sin "hjerne" – de formelle reglene og
+# kravene som er utledet fra styringsdokumenter.
+knowledge_base:
+  # Sti til JSON-filen som inneholder alle regler og krav-definisjoner.
+  # Dette er den viktigste filen for regelmotoren.
+  file_path: "data/Instruks_oslomodellen_knowledge_20250819_112033.json"
+
+# 2. Eksterne Tjenester
+# ---------------------
+# URL-er og endepunkter for eksterne API-er agenten er avhengig av.
+external_services:
+  # API for å slå opp informasjon om norske selskaper. Brukes for å validere
+  # leverandørnavn og hente organisasjonsnummer.
+  brreg_api_url: "https://data.brreg.no/enhetsregisteret/api/enheter"
+
+# 3. Logging
+# ----------
+# Styrer hvor mye informasjon agenten skriver til loggen under kjøring.
+logging:
+  # Definerer loggnivået.
+  # - "DEBUG":   Mest detaljert, for feilsøking. Viser alt.
+  # - "INFO":    Standard. Viser viktige hendelser (start, stopp, utløste regler).
+  # - "WARNING": Viser kun advarsler og feil.
+  # - "ERROR":   Viser kun kritiske feil.
+  level: "INFO"
+
+# 4. Input-validering
+# -------------------
+# Definerer regler for hva som er gyldig input til agenten. Dette sikrer
+# datakvalitet og forhindrer feil under kjøring.
+validation:
+  # En liste over felter som MÅ være til stede i input-dataen for at
+  # agenten skal starte en vurdering.
+  required_input_fields:
+    - "name"
+    - "value"
+    - "category"
+    - "duration_months"
+  
+  # En uttømmende liste over hvilke anskaffelseskategorier agenten
+  # er konfigurert til å håndtere. Input med andre kategorier vil bli avvist.
+  allowed_categories:
+    - "bygg"
+    - "anlegg"
+    - "vare"
+    - "tjeneste"
+    - "renhold"
+
+# ==============================================================================
+# SEKSJON FOR SPESIALIST-AGENTER
+# ==============================================================================
+
+# 5. Konfigurasjon for Lærling-agent
+# ------------------------------------
+apprentice_agent_config:
+  # Terskelverdier som må være oppfylt før en dypere analyse starter.
+  # Basert på Forskrift om offentlige anskaffelser § 7-9.
+  threshold_value: 1300000       # Minimum kontraktsverdi i NOK.
+  min_duration_months: 3         # Minimum kontraktsvarighet i måneder.
+
+  # Konfigurasjon for å vurdere "særlig behov" for lærlinger.
+  # Dette er basert på data fra Utdanningsdirektoratet (UDIR).
+  udir_data_file: "data/utdanningsprogram.csv" # Sti til CSV-fil med andel lærlingkontrakter per fag.
+  special_need_threshold: 0.90   # Hvis "Andel kontrakt" er UNDER denne verdien (90%), regnes det som et "særlig behov".
+
+  # Minimum antall tegn i anskaffelsens beskrivelse for at agenten skal
+  # forsøke en tekstanalyse for å identifisere fagområder.
+  min_description_length: 150
+
+  # Innstillinger for bruk av store språkmodeller (LLM) for analyse.
+  llm:
+    enabled: false # Sett til 'true' for å aktivere LLM-basert analyse av fag og uforholdsmessighet.
+
+# ==============================================================================
+# SEKSJON FOR TESTING OG UTVIKLING
+# ==============================================================================
+
+# 6. Mock Risikovurdering
+# -----------------------
+# Denne seksjonen lar oss simulere resultatet av en risikovurdering for
+# testing av regler som er avhengige av risiko, uten å måtte kjøre en full
+# risikomodul.
+# NB: DENNE SKAL IKKE BRUKES I PRODUKSJON.
+mock_risk_assessment:
+  # Definer et fast, overordnet risikonivå for hver kategori.
+  # Dette brukes av regler som sjekker f.eks. "risiko_nivaa = høy".
+  # Gyldige verdier: "lav", "moderat", "høy"
+  risk_level_by_category:
+    bygg: "høy"
+    anlegg: "høy"
+    renhold: "høy"
+    tjeneste: "moderat"
+    vare: "lav"
+  
+  # Definer en liste med spesifikke risikotyper som skal anses som "identifisert"
+  # for hver kategori. Dette brukes av regler som sjekker f.eks.
+  # "risiko_type IN [arbeidslivskriminalitet, sosial_dumping]".
+  # Gyldige verdier må samsvare med RiskType-enum i `src/models/enums.py`.
+  risks_by_category:
+    bygg:
+      - "arbeidslivskriminalitet"
+      - "sosial_dumping"
+    anlegg:
+      - "arbeidslivskriminalitet"
+      - "sosial_dumping"
+      - "miljø"
+    renhold:
+      - "sosial_dumping"
+    tjeneste:
+      - "datasikkerhet"
+    vare:
+      - "menneskerettigheter"
+      - "korrupsjon"

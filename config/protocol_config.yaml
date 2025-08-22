@@ -1,0 +1,142 @@
+# ==============================================================================
+# BRUKERVEILEDNING OG KONFIGURASJON FOR RAPPORTGENERATOR
+# ==============================================================================
+#
+# Velkommen! Denne filen lar deg skreddersy utseendet og innholdet i den
+# endelige vurderings-rapporten (anskaffelsesprotokollen).
+#
+# HVORDAN BRUKE FILEN:
+# 1. Endre tekstene under 'protocol_titles' for å tilpasse overskrifter.
+# 2. Endre på rekkefølgen i 'section_order' for å bytte plass på seksjonene.
+# 3. Tilpass 'requirement_groups' for å bestemme hvordan krav skal grupperes
+#    i den kompakte oversiktstabellen.
+# 4. Skriv inn eller juster de brukervennlige forklaringene under
+#    'requirement_explanations'. Dette er den viktigste delen for å oversette
+#    tekniske kravkoder til forståelig tekst.
+#
+# TIPS:
+# - Du kan bruke Markdown for formatering i forklaringstekstene (f.eks. *kursiv*).
+# - '#' i starten av en linje er en kommentar og vil bli ignorert.
+#
+# ------------------------------------------------------------------------------
+
+# 1. GENERELLE TITTELER OG TEKSTER
+# ---------------------------------
+# Her definerer du de faste tekstene som brukes i rapporten.
+protocol_titles:
+  main_title: "ANSKAFFELSESNOTAT"
+  metadata_section_title: "1. OPPLYSNINGER OM ANSKAFFELSEN"
+  summary_section_title: "2. HOVEDKONKLUSJONER"
+  key_requirements_section_title: "3. OVERSIKT OVER GJELDENDE KRAV"
+  appendix_section_title: "4. VEDLEGG: DETALJERT FORKLARING AV KRAV"
+  # --------------------------------------------------
+  recommendations_title: "Særlige anbefalinger og advarsler"
+  footer_text: "Dette er en automatisert rapport generert av Oslo kommunes anskaffelsesagent. Vurderingen er basert på informasjonen som ble oppgitt ved kjøringstidspunktet."
+  source_document_names:
+    oslomodellen: "Instruks for Oslo kommunes anskaffelser"
+    anskaffelsesforskrift: "Anskaffelsesforskriften"
+    # Legg til flere kilder her ved behov
+
+# 2. SEKSJONSREKKEFØLGE
+# ---------------------
+# Bestemmer hvilke seksjoner som skal være med i rapporten og rekkefølgen på dem.
+# Gyldige verdier er: 'summary', 'key_requirements', 'appendix'.
+section_order:
+  - 'summary'
+  - 'key_requirements'
+  - 'appendix'
+
+# 3. GRUPPERING AV KRAV
+# ----------------------
+# Her definerer du hvordan de ulike kravkodene skal samles i oversiktstabellen.
+# Hver hovednøkkel (f.eks. "Seriøsitetskrav...") blir en egen rad i tabellen.
+# Kravkoder som ikke finnes i noen av listene, samles automatisk under "Andre krav".
+requirement_groups:
+  "Seriøsitetskrav (Oslomodellen)":
+    - "A"
+    - "B"
+    - "C"
+    - "D"
+    - "E"
+    - "F"
+    - "G"
+    - "H"
+    - "I"
+    - "J"
+    - "K"
+    - "L"
+    - "M"
+    - "N"
+    - "O"
+    - "P"
+    - "Q"
+    - "R"
+    - "S"
+    - "T"
+    - "U"
+  "Krav til leverandørkjede":
+    - "UL-MAX-0"
+    - "UL-MAX-1"
+    - "UL-MAX-2"
+    - "UL-UNNTAK-VURDERING"
+  "Aktsomhetsvurderinger":
+    - "AKTSOMHET-A"
+    - "AKTSOMHET-B"
+  "Sosiale Krav":
+    - "V"
+    - "RESERVERT-KONTRAKT-PLIKT"
+    - "RESERVERT-KONTRAKT-VURDERING"
+  "Dokumentasjonskrav":
+    - "SKATT-STD"
+    - "SKATT-UTV"
+
+# 4. FORKLARINGSTEKSTER FOR VEDLEGGET
+# ------------------------------------
+# Dette er "ordboken" som oversetter de tekniske kravkodene til en
+# fullstendig, brukervennlig forklaring. Hver kode som kan dukke opp i en
+# rapport bør ha en forklaring her.
+requirement_explanations:
+  # Seriøsitetskrav
+  A: "Leverandør og eventuelle underleverandører skal sikre at ansatte har lønns- og arbeidsvilkår i tråd med gjeldende forskrifter og tariffer."
+  B: "Alle arbeidstakere på bygge- og anleggsplasser skal bære gyldig HMS-kort utstedt av Arbeidstilsynet."
+  C: "For utførende fag kreves det at minimum 50% av arbeidet utføres av faglærte med fag- eller svennebrev."
+  D: "Hovedregelen er at arbeidstakere skal være fast ansatt for å sikre forutsigbarhet og trygge ansettelsesforhold."
+  H: "Generelt krav om at antall ledd med underleverandører skal begrenses for å sikre oversikt og kontroll."
+  T: "Leverandøren skal oppfylle sine forpliktelser med hensyn til skatt, trygdeavgift og merverdiavgift. Dette dokumenteres normalt ved utvidet skatteattest."
+  
+  # Lærlinger
+  V: "Kontrakten skal inneholde krav om at leverandøren er tilknyttet en godkjent lærlingordning og benytter lærlinger i utførelsen av oppdraget."
+  
+  # Underleverandører
+  UL-MAX-0: "**Forbud mot underleverandører:** Basert på en *høy* risikovurdering, er hovedregelen at leverandøren selv må utføre alt arbeid."
+  UL-MAX-1: "**Maksimalt ett ledd underleverandører:** Standardbegrensningen for anskaffelser med *moderat* risiko."
+  UL-MAX-2: "**To ledd underleverandører tillatt:** Kan tillates for anskaffelser med *lav* risiko."
+  UL-UNNTAK-VURDERING: "**Viktig unntaksmulighet:** Det *kan* åpnes for flere ledd enn hovedregelen tilsier hvis det er nødvendig for konkurranse eller effektiv gjennomføring. Dette krever en særskilt, skriftlig begrunnelse i anskaffelsesdokumentene."
+  
+  # Aktsomhetsvurderinger
+  AKTSOMHET-A: "**Standard kravsett (A):** Leverandøren plikter å gjennomføre aktsomhetsvurderinger i tråd med OECDs retningslinjer for å identifisere, forebygge og håndtere risiko for negativ påvirkning på grunnleggende menneskerettigheter og anstendige arbeidsforhold."
+  AKTSOMHET-B: "**Forenklet kravsett (B):** Et mindre omfattende sett med krav til aktsomhetsvurderinger som kan benyttes ved kortere kontrakter (under 1 år) eller i umodne markeder for å ikke utelukke leverandører unødig."
+
+  # Skatteattest
+  SKATT-STD: "**Standard skatteattest:** Leverandøren må fremlegge en standard skatte- og avgiftsattest som ikke er eldre enn 6 måneder."
+  SKATT-UTV: "**Utvidet skatteattest:** Leverandøren må gi kommunen fullmakt til å innhente en utvidet skatteattest. Dette kravet gjelder også for eventuelle underleverandører for kontrakter over 500 000 NOK ekskl. mva."
+
+  # Reserverte Kontrakter
+  RESERVERT-KONTRAKT-PLIKT: "**Plikt til reservert kontrakt:** Konkurransen *skal* forbeholdes virksomheter (f.eks. arbeidsinkluderingsbedrifter) hvis hovedformål er sosial og yrkesmessig integrering av funksjonshemmede eller vanskeligstilte personer."
+  RESERVERT-KONTRAKT-VURDERING: "**Vurderingsplikt for reservert kontrakt:** Det *skal* gjøres en konkret vurdering av om denne anskaffelsen egner seg for å bli reservert for virksomheter med sosialt formål. Vurderingen skal dokumenteres."
+
+  # ... fyll inn forklaringer for de resterende kravene (I, J, K, etc.) her ...
+
+  # 5. Formatering for eksport
+# ----------------------------
+# Styrer utseendet på de eksporterte filene (Word, PDF).
+formatting:
+  # Sti til en Word-malfil (.docx). Stilene i denne filen (Overskrift 1, Normal etc.)
+  # vil bli brukt i den genererte Word-rapporten.
+  docx_template: "config/template.docx"
+
+  # Navnet på systemskriften som skal brukes ved generering av PDF.
+  # Sørg for at skriften er installert på systemet.
+  # Eksempler for Windows: "Calibri", "Arial", "Times New Roman"
+  # Eksempler for macOS: "Helvetica Neue", "Georgia"
+  pdf_font: "Helvetica Neue"

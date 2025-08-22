@@ -1,0 +1,25 @@
+# Python virtual environment
+/.venv/
+
+# Byte-code files
+__pycache__/
+*.pyc
+*.pyd
+*.pyo
+
+# Distribution / build files
+build/
+dist/
+*.egg-info/
+
+# Test and cache
+.pytest_cache/
+.mypy_cache/
+
+# Logs and temporary files
+*.log
+*.swp
+*.bak
+
+# macOS specific
+.DS_Store
