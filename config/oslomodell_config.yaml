@@ -16,11 +16,10 @@ knowledge_base:
 
 # 2. Eksterne Tjenester
 # ---------------------
-# URL-er og endepunkter for eksterne API-er agenten er avhengig av.
 external_services:
-  # API for å slå opp informasjon om norske selskaper. Brukes for å validere
-  # leverandørnavn og hente organisasjonsnummer.
-  brreg_api_url: "https://data.brreg.no/enhetsregisteret/api/enheter"
+  brreg_enhetsregisteret_url: "https://data.brreg.no/enhetsregisteret/api"
+  brreg_regnskapsregisteret_url: "https://data.brreg.no/regnskapsregisteret"
+  brreg_fullmakt_api_url: "https://data.brreg.no/fullmakt"
 
 # 3. Logging
 # ----------
@@ -56,6 +55,29 @@ validation:
     - "renhold"
 
 # ==============================================================================
+# NY SEKSJON FOR SELSKAPSANALYSE
+# ==============================================================================
+
+# 5. Konfigurasjon for Selskapsanalyse
+# ------------------------------------
+# Styrer oppførselen til CompanyAnalyzer-verktøyet.
+company_analyzer_config:
+  financial_thresholds:
+    soliditet_prosent:
+      kritisk: 0
+      svak: 10
+      tilfredsstillende: 20
+      god: 40
+    likviditetsgrad:
+      svak: 1.0
+      tilfredsstillende: 1.5
+      god: 2.0
+    resultatgrad_prosent:
+      svak: 0
+      tilfredsstillende: 5
+      god: 10
+
+# ==============================================================================
 # SEKSJON FOR SPESIALIST-AGENTER
 # ==============================================================================
 
@@ -78,45 +100,199 @@ apprentice_agent_config:
 
   # Innstillinger for bruk av store språkmodeller (LLM) for analyse.
   llm:
-    enabled: false # Sett til 'true' for å aktivere LLM-basert analyse av fag og uforholdsmessighet.
+    enabled: false # Sett denne til TRUE for å aktivere
+    llm_parameters:
+      purpose: "fast_evaluation"
+      include_thoughts: false # Legger til denne som beskrevet i planen
+
+    prompt_extract_trades: |
+      prompt_extract_trades: |
+      Du er en ekspert på offentlige anskaffelser i Norge og Oslomodellens lærlingkrav.
+      Din oppgave er å analysere en anskaffelse for å identifisere hvilke
+      YRKESFAGLIGE FAGOMRÅDER som er direkte involvert i UTFØRELSEN av kontraktsarbeidet.
+
+      VIKTIG KONTEKST:
+      - Lærlingkravet gjelder for fagfolk som skal utføre selve jobben, ikke for fag relatert til produktene som kjøpes inn.
+      - For rene VAREKJØP (f.eks. innkjøp av PC-er, møbler) er det normalt INGEN relevante utførende fagområder, selv om produktene er tekniske.
+      - For BYGG, ANLEGG, og HÅNDVERKSTJENESTER er det nesten alltid relevante fagområder.
+
+      INPUT:
+      Du vil motta en JSON-tekst med "description" og "valid_trades".
+
+      OPPGAVE:
+      1. Les "description" og avgjør hva slags ARBEID som skal UTFØRES.
+      2. Hvis arbeidet er et rent vareinnkjøp, returner en tom liste: [].
+      3. Hvis arbeidet involverer praktisk utførelse (bygging, montering, vedlikehold), identifiser de relevante fagområdene fra "valid_trades".
+      4. Returner en JSON-liste med de nøyaktige navnene på de relevante fagområdene.
+
+# 6. Konfigurasjon for Menneskerettighets-agent
+# -----------------------------------------------
+# Styrer den dynamiske vurderingen av risiko for brudd på menneskerettigheter.
+human_rights_and_law_agent_config:
+  enabled: false
+  llm_parameters:
+    purpose: "fast_evaluation"
+    include_thoughts: false
+
+  prompt: |
+    Du er en ekspert på etiske retningslinjer, menneskerettigheter, OG internasjonal humanitærrett i globale leverandørkjeder.
+    Analyser anskaffelsen nedenfor og klassifiser risikoen.
+    
+    Vurderingen skal dekke tvangsarbeid, barnearbeid, arbeidstakerrettigheter, og brudd på internasjonal humanitærrett (f.eks. handel i ulovlig okkuperte områder).
+    Bruk den vedlagte risiko-konteksten som en veiledende kilde for din vurdering.
+
+    ---
+    RISIKO-KONTEKST FRA DFØs HØYRISIKOLISTE (VEILEDENDE):
+    - **Varer generelt:** Ofte forbundet med høy risiko globalt.
+    - **Bygg/Anlegg:** Høy risiko for arbeidstakerrettigheter i Norge. Vareelementer (byggematerialer) har høy risiko globalt.
+    - **IKT-utstyr, elektriske transportmidler, solcellepaneler:** Er på høyrisikolister for brudd på menneskerettigheter.
+    - **Stein:** Høy risiko (utvinning og foredling).
+    - **Metall:** Høy risiko (utvinning og foredling).
+    ---
+
+    ANALYSER DENNE ANSKAFFELSEN:
+    ```json
+    {{
+      "name": "{procurement_name}",
+      "category": "{procurement_category}",
+      "subcategory": "{procurement_subcategory}",
+      "description": "{procurement_description}",
+      "value_nok": {procurement_value}
+    }}
+    ```
+
+    OPPGAVE:
+    Returner ETT enkelt JSON-objekt med:
+    1.  "risk_level": Din vurdering (KUN "lav", "moderat", eller "høy").
+    2.  "justification": En kort, faktabasert begrunnelse.
+
+# 7. Konfigurasjon for Korrupsjons-agent
+# ---------------------------------------
+# Styrer den dynamiske vurderingen av risiko for korrupsjon.
+corruption_agent_config:
+  enabled: false
+  llm_parameters:
+    purpose: "fast_evaluation"
+    include_thoughts: false
+
+  # PROMPT: Spisset prompt for å identifisere korrupsjonsrisiko.
+  prompt: |
+    Du er en ekspert på antikorrupsjon og risikovurdering i offentlige anskaffelser.
+    Analyser følgende anskaffelse og klassifiser risikoen for korrupsjon (bestikkelser, misbruk av offentlige midler, manglende åpenhet).
+
+    Vurder faktorer som:
+    - **Bransje:** Er dette en bransje kjent for høy korrupsjonsrisiko (f.eks. bygg/anlegg, store infrastrukturprosjekter)?
+    - **Geografi:** Involverer leverandørkjeden land med høy score på Corruption Perception Index?
+    - **Kontraktsverdi:** Kan store verdier øke insentivet for korrupsjon?
+    - **Kompleksitet:** Kan komplekse prosjekter skjule uregelmessigheter?
+
+    ANALYSER DENNE ANSKAFFELSEN:
+    ```json
+    {{
+      "name": "{procurement_name}",
+      "category": "{procurement_category}",
+      "subcategory": "{procurement_subcategory}",
+      "description": "{procurement_description}",
+      "value_nok": {procurement_value}
+    }}
+    ```
+
+    OPPGAVE:
+    Basert på informasjonen over, returner ETT enkelt JSON-objekt som inneholder:
+    1.  "risk_level": Din vurdering (KUN "lav", "moderat", eller "høy").
+    2.  "justification": En kort, faktabasert begrunnelse for din vurdering.
+
+# 8. Konfigurasjon for Miljø-agent
+# ---------------------------------
+# Styrer den dynamiske vurderingen av risiko for negativ miljøpåvirkning.
+environment_agent_config:
+  enabled: false
+  # Parametere for LLM-kallet.
+  llm_parameters:
+    purpose: "fast_evaluation"
+    include_thoughts: false
+
+  # PROMPT: Spisset prompt for å identifisere miljørisiko i leverandørkjeden.
+  prompt: |
+    Du er en ekspert på miljørisiko i globale forsyningskjeder.
+    Analyser følgende anskaffelse og klassifiser risikoen for negativ påvirkning på miljøet.
+
+    Vurder faktorer som:
+    - **Råvareutvinning:** Medfører produksjonen risiko for avskoging, vannforurensning eller tap av biologisk mangfold?
+    - **Produksjonsprosesser:** Innebærer produksjonen høye klimagassutslipp, bruk av skadelige kjemikalier eller store mengder vann?
+    - **Transport:** Krever leverandørkjeden lang og forurensende transport?
+    - **Bransje:** Er dette en bransje med kjent høyt miljøavtrykk (f.eks. elektronikk, tekstiler, byggematerialer, kjemikalier)?
+
+    ANALYSER DENNE ANSKAFFELSEN:
+    ```json
+    {{
+      "name": "{procurement_name}",
+      "category": "{procurement_category}",
+      "subcategory": "{procurement_subcategory}",
+      "description": "{procurement_description}",
+      "value_nok": {procurement_value}
+    }}
+    ```
+
+    OPPGAVE:
+    Basert på informasjonen over, returner ETT enkelt JSON-objekt som inneholder:
+    1.  "risk_level": Din vurdering (KUN "lav", "moderat", eller "høy").
+    2.  "justification": En kort, faktabasert begrunnelse for din vurdering.
+
+# 9. Konfigurasjon for Oppsummerings-agent (Syntese)
+# ----------------------------------------------------
+# Genererer en lettlest oppsummering av de samlede tekniske funnene.
+synthesis_agent_config:
+  enabled: false
+  # Vi velger en kraftigere modell for denne oppgaven, da den krever resonnering og språkproduksjon.
+  llm_parameters:
+    purpose: "complex_reasoning" 
+    include_thoughts: true
+
+  # PROMPT: Instruerer LLM-en til å fungere som en erfaren rådgiver.
+  prompt: |
+    Du er en erfaren seniorrådgiver i Oslo kommune med spesialkompetanse på ansvarlig næringsliv.
+    Flere uavhengige spesialistagenter har nå vurdert en anskaffelse for ulike risikoer. Din oppgave er å syntetisere disse funnene til en helhetlig, lettlest aktsomhetsvurdering for saksbehandleren.
+
+    Her er all informasjonen du har tilgjengelig:
+
+    ---
+    **1. OM ANSKAFFELSEN:**
+    {procurement_context}
+    ---
+    **2. SPESIALISTAGENTENES FUNN:**
+    {risk_assessments_summary}
+    ---
+
+    **DIN OPPGAVE:**
+    Skriv en kort, samlet aktsomhetsvurdering i sammenhengende prosa. Vurderingen skal veve sammen informasjonen over.
+    
+    Start med en overordnet konklusjon om risikobildet, og forklar deretter *hvorfor* risikoene er vurdert som de er, ved å koble spesialistenes funn direkte til detaljene om anskaffelsen. Avslutt med en setning om hva dette betyr for behovet for oppfølging.
+
+    **SAMLET AKTSOMHETSVURDERING:**
 
 # ==============================================================================
 # SEKSJON FOR TESTING OG UTVIKLING
 # ==============================================================================
 
-# 6. Mock Risikovurdering
-# -----------------------
-# Denne seksjonen lar oss simulere resultatet av en risikovurdering for
-# testing av regler som er avhengige av risiko, uten å måtte kjøre en full
-# risikomodul.
-# NB: DENNE SKAL IKKE BRUKES I PRODUKSJON.
+# 10. Mock Risikovurdering (Hardkodet for testing)
+# ------------------------------------------------
+# Definerer en liste med spesifikke risikovurderinger for hver kategori.
+# Hver vurdering har en 'type' og et 'level', som matcher den nye datamodellen.
 mock_risk_assessment:
-  # Definer et fast, overordnet risikonivå for hver kategori.
-  # Dette brukes av regler som sjekker f.eks. "risiko_nivaa = høy".
-  # Gyldige verdier: "lav", "moderat", "høy"
-  risk_level_by_category:
-    bygg: "høy"
-    anlegg: "høy"
-    renhold: "høy"
-    tjeneste: "moderat"
-    vare: "lav"
-  
-  # Definer en liste med spesifikke risikotyper som skal anses som "identifisert"
-  # for hver kategori. Dette brukes av regler som sjekker f.eks.
-  # "risiko_type IN [arbeidslivskriminalitet, sosial_dumping]".
-  # Gyldige verdier må samsvare med RiskType-enum i `src/models/enums.py`.
-  risks_by_category:
-    bygg:
-      - "arbeidslivskriminalitet"
-      - "sosial_dumping"
-    anlegg:
-      - "arbeidslivskriminalitet"
-      - "sosial_dumping"
-      - "miljø"
-    renhold:
-      - "sosial_dumping"
-    tjeneste:
-      - "datasikkerhet"
-    vare:
-      - "menneskerettigheter"
-      - "korrupsjon"
+  bygg:
+    - type: "arbeidslivskriminalitet"
+      level: "høy"
+    - type: "sosial_dumping"
+      level: "høy"
+  anlegg:
+    - type: "arbeidslivskriminalitet"
+      level: "høy"
+    - type: "sosial_dumping"
+      level: "høy"
+  renhold:
+    - type: "sosial_dumping"
+      level: "høy"
+  tjeneste:
+    - type: "arbeidslivskriminalitet"
+      level: "moderat"

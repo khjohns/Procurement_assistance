@@ -81,40 +81,22 @@ class ValueCondition(BaseCondition):
             raise ValueError(f"Value cannot be negative: {v}")
         return v
 
-
-class RiskLevelCondition(BaseCondition):
-    """Condition for general risk level assessment."""
-    field: Literal["risiko_nivaa"]  # <-- Endret navn for å være utvetydig
-    value: Union[RiskLevel, List[RiskLevel]]
+class RiskCondition(BaseCondition):
+    """
+    NY BETINGELSE: Lar en regel sjekke for spesifikke kombinasjoner av risikotype og nivå.
+    Denne erstatter de to gamle, separate risikobetingelsene.
+    """
+    field: Literal["risiko"] # Et nytt, felles feltnavn for alle risikosjekker
     
-    @field_validator('value')
-    def validate_risk_level(cls, v):
-        """Ensure value is valid risk level."""
-        if isinstance(v, list):
-            for item in v:
-                if not isinstance(item, RiskLevel):
-                    raise ValueError(f"All values must be RiskLevel enums, got {type(item)}")
-        elif not isinstance(v, RiskLevel):
-            raise ValueError(f"Value must be RiskLevel enum, got {type(v)}")
-        return v
-
-
-class RiskTypeCondition(BaseCondition):
-    """Condition for specific risk type assessment."""
-    field: Literal["risiko_type"]   # <-- Endret navn for å være utvetydig
-    value: Union[RiskType, List[RiskType]]
+    # Betingelsen kan sjekke for en eller flere typer, og ett eller flere nivåer
+    risk_types: List[RiskType]
+    risk_levels: List[RiskLevel]
     
-    @field_validator('value')
-    def validate_risk_type(cls, v):
-        """Ensure value is valid risk type."""
-        if isinstance(v, list):
-            for item in v:
-                if not isinstance(item, RiskType):
-                    raise ValueError(f"All values must be RiskType enums, got {type(item)}")
-        elif not isinstance(v, RiskType):
-            raise ValueError(f"Value must be RiskType enum, got {type(v)}")
-        return v
-
+    # Operatoren bestemmer logikken for hvordan sjekken skal utføres
+    operator: Literal[
+        ConditionOperator.CONTAINS_ANY, # Returnerer True hvis minst én match finnes
+        ConditionOperator.CONTAINS_ALL  # Returnerer True hvis alle spesifiserte risk_types finnes med angitte nivåer
+    ] = Field(default=ConditionOperator.CONTAINS_ANY)
 
 class DurationCondition(BaseCondition):
     """Condition for contract duration."""
@@ -216,8 +198,7 @@ Condition = Annotated[
         CategoryCondition,
         SubCategoryCondition,
         ValueCondition,
-        RiskLevelCondition,
-        RiskTypeCondition,
+        RiskCondition,
         DurationCondition,
         ReferenceCondition,
         PhaseCondition,
@@ -469,7 +450,7 @@ class BaseMetadata(BaseModel):
         description="Requirements defined in this chunk"
     )
     
-    # Risk context
+    # Risk context NB BØR OPPDATERES MED NYE RISKCONDITION
     addresses_risks: List[RiskType] = Field(
         default_factory=list,
         description="Risk types addressed in this chunk"
@@ -485,6 +466,14 @@ class BaseMetadata(BaseModel):
 # ==============================================================================
 # BASE INPUT MODEL
 # ==============================================================================
+class RiskAssessmentItem(BaseModel):
+    """
+    NY MODELL: Representerer én enkelt, spesifikk risikovurdering ved å koble
+    en risikotype direkte til sitt nivå. Dette er kjernen i den nye logikken.
+    """
+    type: RiskType = Field(..., description="Den spesifikke risikotypen.")
+    level: RiskLevel = Field(..., description="Vurderingsnivået for denne spesifikke risikoen.")
+    justification: Optional[str] = Field(None, description="Spesialistagentens begrunnelse for vurderingen.")
 
 class BaseProcurementInput(BaseModel):
     """Base input model for all procurement assessments."""
@@ -507,13 +496,19 @@ class BaseProcurementInput(BaseModel):
     project_number: Optional[str] = Field(None, description="Project number (prosjektnr.)")
     tender_deadline: Optional[datetime] = Field(None, description="The deadline for submitting tenders (tilbudsfrist)")
     
-    # Risk assessment
-    identified_risks: List[RiskType] = Field(
+    risk_assessments: List[RiskAssessmentItem] = Field(
         default_factory=list,
-        description="Identified risk types"
-    )
-    risk_level: Optional[RiskLevel] = Field(None, description="Overall risk assessment")
+        description="En komplett liste over alle uavhengige risikovurderinger, hver med sin type og sitt nivå.")
     
+    # NYE FELTER FOR LEVERANDØRSJEKK
+    supplier_name_to_verify: Optional[str] = Field(None, description="Navnet på leverandøren som skal verifiseres mot OBS-listen.")
+    supplier_is_foreign: bool = Field(False, description="Angir om den oppgitte leverandøren er utenlandsk.")
+    
+    # Felt for å lagre det verifiserte resultatet
+    verified_supplier_orgnr: Optional[str] = Field(None, description="Det bekreftede organisasjonsnummeret etter vellykket verifisering.")
+
+    company_analysis: Optional[CompanyAnalysisResult] = Field(None, description="Resultatet fra en detaljert analyse av den verifiserte leverandøren.")
+
     # Supplier and market information
     potential_supplier: Optional[str] = Field(None, description="Potential preferred supplier")
     known_suppliers_count: int = Field(default=0, description="Number of known suppliers", ge=0)
@@ -596,6 +591,8 @@ class BaseAssessment(BaseModel):
         default_factory=list,
         description="Exceptions for this assessment"
     )
+
+    summary_prose: Optional[str] = Field(None, description="En lettlest prosa-oppsummering av de viktigste funnene i vurderingen.")
     
     # Confidence and quality
     confidence_score: float = Field(..., ge=0.0, le=1.0, description="Assessment confidence")
@@ -640,7 +637,6 @@ class BaseAssessment(BaseModel):
         json_encoders = {
             datetime: lambda v: v.isoformat()
         }
-
 
 # ==============================================================================
 # INTERFACES

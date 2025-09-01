@@ -23,3 +23,12 @@ dist/
 
 # macOS specific
 .DS_Store
+
+# Project-specific ignores
+data/
+*old.py
+full_output.json
+
+# Configuration and secrets
+.env
+config/llm_config.yaml

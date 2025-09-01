@@ -25,7 +25,6 @@ class SystemStatus(str, Enum):
 
 class RiskLevel(str, Enum):
     """Risk levels used across all agents."""
-    ANY = "enhver"
     NONE = "ingen"
     LOW = "lav"
     MEDIUM = "moderat"
@@ -48,7 +47,6 @@ class ProcurementSubCategory(str, Enum):
     ICT = "ikt"
     CONSULTANT = "konsulent"
     TRANSPORT = "transport"
-    CATERING = "kantine"
     SECURITY = "sikkerhet"
     MAINTENANCE = "vedlikehold"
     ENERGY = "energi"
@@ -57,13 +55,13 @@ class ProcurementSubCategory(str, Enum):
     PRINTING = "trykking_kopiering"
     PACKAGING = "pakking_emballering"
     FRUIT = "fruktordninger"
+    CATERING = "catering"
     TIRE_HOTEL = "dekkhotell"
     DISTRIBUTION_TRANSPORT = "distribusjon_transport"
     ASSEMBLY = "monteringsoppdrag"
     SIGN_PRODUCTION = "skiltproduksjon"
     TEXTILE = "søm_reparasjoner_tekstiltrykk"
     CLEANING = "renhold" # Kan overlappe med ProcurementCategory
-    LAUNDRY = "vaskeri"
 
 class ContractType(str, Enum):
     """Contract types."""
@@ -175,13 +173,14 @@ class ConditionOperator(str, Enum):
     IS_FALSE = "is_false"
     IS_NULL = "is_null"
     IS_NOT_NULL = "is_not_null"
+    CONTAINS_ANY = "contains_any"
+    CONTAINS_ALL = "contains_all"
 
 class RuleField(str, Enum):
     """Fields that can be used in rule conditions."""
     PROCUREMENT_CATEGORY = "anskaffelsestype"
     PROCUREMENT_VALUE = "kontraktsverdi"
-    RISK_LEVEL = "risiko"  # General risk level
-    RISK_TYPE = "risikotype"  # Specific risk type
+    RISK = "risiko"
     DURATION_YEARS = "kontraktsvarighet_år"
     DURATION_MONTHS = "varighet_måneder"
     SUPPLIER_COUNT = "antall_leverandører"
@@ -203,15 +202,8 @@ class RiskType(str, Enum):
     ENVIRONMENT = "miljø"
     CLIMATE = "klima"
     CORRUPTION = "korrupsjon"
-    HUMAN_RIGHTS = "menneskerettigheter"
-    INTERNATIONAL_LAW = "internasjonal_humanitærrett"
-    OCCUPATION = "ulovlig_okkupasjon"
-    DATA_SECURITY = "datasikkerhet"
-    QUALITY = "kvalitet"
-    DELIVERY = "leveranse"
-    FINANCIAL = "økonomi"
-    REPUTATION = "omdømme"
-    COMPLIANCE = "etterlevelse"
+    WORKER_RIGHTS = "arbeidstakerrettigheter"
+    HUMAN_RIGHTS_AND_LAW = "menneskerettigheter-og-folkerett"
     NONE = "ingen"
 
 # ==============================================================================

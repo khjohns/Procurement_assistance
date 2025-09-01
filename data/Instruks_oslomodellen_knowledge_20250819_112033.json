@@ -267,7 +267,7 @@
         "justification_reference": "3.1",
         "conditions": [
           {
-            "operator": ">",
+            "operator": ">=",
             "field": "kontraktsverdi",
             "value": 500000
           },
@@ -407,7 +407,8 @@
             "value": [
               "bygg",
               "anlegg",
-              "tjeneste"
+              "tjeneste",
+              "renhold"
             ]
           },
           {
@@ -443,7 +444,8 @@
             "value": [
               "bygg",
               "anlegg",
-              "tjeneste"
+              "tjeneste",
+              "renhold"
             ]
           },
           {
@@ -455,11 +457,16 @@
             ]
           },
           {
-            "operator": "in",
-            "field": "risiko_type",
-            "value": [
+            "field": "risiko",
+            "operator": "contains_any",
+            "risk_types": [
               "arbeidslivskriminalitet",
               "sosial_dumping"
+            ],
+            "risk_levels": [
+              "lav",
+              "moderat",
+              "høy"
             ]
           }
         ],
@@ -541,7 +548,7 @@
             ]
           },
           {
-            "operator": ">",
+            "operator": ">=",
             "field": "kontraktsverdi",
             "value": 500000
           }
@@ -647,7 +654,7 @@
             ]
           },
           {
-            "operator": ">",
+            "operator": ">=",
             "field": "kontraktsverdi",
             "value": 500000
           }
@@ -681,11 +688,16 @@
             ]
           },
           {
-            "operator": "in",
-            "field": "risiko_type",
-            "value": [
+            "field": "risiko",
+            "operator": "contains_any",
+            "risk_types": [
               "arbeidslivskriminalitet",
               "sosial_dumping"
+            ],
+            "risk_levels": [
+              "lav",
+              "moderat",
+              "høy"
             ]
           }
         ],
@@ -793,11 +805,6 @@
               "field": "anskaffelsestype",
               "operator": "in",
               "value": ["bygg", "anlegg", "tjeneste"]
-            },
-            {
-              "field": "risiko_nivaa",
-              "operator": "in",
-              "value": ["lav", "moderat", "høy"]
             }
           ],
           "condition_logic": "AND",
@@ -818,9 +825,13 @@
               "value": ["H"]
             },
             {
-              "field": "risiko_nivaa",
-              "operator": "in",
-              "value": ["moderat"]
+              "field": "risiko",
+              "operator": "contains_any",
+              "risk_types": [
+                "arbeidslivskriminalitet",
+                "sosial_dumping"
+              ],
+              "risk_levels": ["moderat"]
             },
             {
               "field": "anskaffelsestype",
@@ -846,9 +857,13 @@
               "value": ["H"]
             },
             {
-              "field": "risiko_nivaa",
-              "operator": "in",
-              "value": ["høy"]
+              "field": "risiko",
+              "operator": "contains_any",
+              "risk_types": [
+                "arbeidslivskriminalitet",
+                "sosial_dumping"
+              ],
+              "risk_levels": ["høy"]
             },
             {
               "field": "anskaffelsestype",
@@ -874,9 +889,13 @@
               "value": ["H"]
             },
             {
-              "field": "risiko_nivaa",
-              "operator": "in",
-              "value": ["lav"]
+              "field": "risiko",
+              "operator": "contains_any",
+              "risk_types": [
+                "arbeidslivskriminalitet",
+                "sosial_dumping"
+              ],
+              "risk_levels": ["lav"]
             },
             {
               "field": "anskaffelsestype",
@@ -1086,128 +1105,20 @@
     "chunk_type": "regel",
     "rules": [
       {
-        "rule_id": "7.2-AVVISNING-MENNESKERETTIGHETER",
-        "description": "Leverandør skal avvises ved alvorlige brudd på grunnleggende menneskerettigheter.",
+        "rule_id": "7.2-AVVISNING-ETIKK",
+        "description": "Leverandør skal avvises ved alvorlige brudd på etiske retningslinjer (menneskerettigheter, miljø, korrupsjon, etc.)",
         "justification_reference": "jf. punkt 7.2",
         "conditions": [
           {
-            "operator": "in",
-            "field": "risiko_type",
-            "value": [
-              "menneskerettigheter"
-            ]
-          },
-          {
-            "operator": "in",
-            "field": "risiko_nivaa",
-            "value": [
-              "høy"
-            ]
-          }
-        ],
-        "condition_logic": "AND",
-        "activates_requirement_codes": [
-          "AVVISNING_ETISKE_BRUDD"
-        ],
-        "priority": 0,
-        "overrides_rules": [],
-        "valid_from": null,
-        "valid_until": null
-      },
-      {
-        "rule_id": "7.2-AVVISNING-ARBEIDSTAKERRETTIGHETER",
-        "description": "Leverandør skal avvises ved alvorlige brudd på arbeidstakerrettigheter.",
-        "justification_reference": "jf. punkt 7.2",
-        "conditions": [
-          {
-            "operator": "contains",
-            "field": "kvalitativ_betingelse",
-            "value": "alvorlige brudd på arbeidstakerrettigheter"
-          }
-        ],
-        "condition_logic": "AND",
-        "activates_requirement_codes": [
-          "AVVISNING_ETISKE_BRUDD"
-        ],
-        "priority": 0,
-        "overrides_rules": [],
-        "valid_from": null,
-        "valid_until": null
-      },
-      {
-        "rule_id": "7.2-AVVISNING-HUMANITAERRETT",
-        "description": "Leverandør skal avvises ved alvorlige brudd på internasjonal humanitærrett.",
-        "justification_reference": "jf. punkt 7.2",
-        "conditions": [
-          {
-            "operator": "in",
-            "field": "risiko_type",
-            "value": [
-              "internasjonal_humanitærrett"
-            ]
-          },
-          {
-            "operator": "in",
-            "field": "risiko_nivaa",
-            "value": [
-              "høy"
-            ]
-          }
-        ],
-        "condition_logic": "AND",
-        "activates_requirement_codes": [
-          "AVVISNING_ETISKE_BRUDD"
-        ],
-        "priority": 0,
-        "overrides_rules": [],
-        "valid_from": null,
-        "valid_until": null
-      },
-      {
-        "rule_id": "7.2-AVVISNING-MILJO",
-        "description": "Leverandør skal avvises ved alvorlige miljøødeleggelser.",
-        "justification_reference": "jf. punkt 7.2",
-        "conditions": [
-          {
-            "operator": "in",
-            "field": "risiko_type",
-            "value": [
-              "miljø"
-            ]
-          },
-          {
-            "operator": "in",
-            "field": "risiko_nivaa",
-            "value": [
-              "høy"
-            ]
-          }
-        ],
-        "condition_logic": "AND",
-        "activates_requirement_codes": [
-          "AVVISNING_ETISKE_BRUDD"
-        ],
-        "priority": 0,
-        "overrides_rules": [],
-        "valid_from": null,
-        "valid_until": null
-      },
-      {
-        "rule_id": "7.2-AVVISNING-KORRUPSJON",
-        "description": "Leverandør skal avvises ved alvorlig korrupsjon.",
-        "justification_reference": "jf. punkt 7.2",
-        "conditions": [
-          {
-            "operator": "in",
-            "field": "risiko_type",
-            "value": [
+            "field": "risiko",
+            "operator": "contains_any",
+            "risk_types": [
+              "menneskerettigheter-og-folkerett",
+              "arbeidstakerrettigheter",
+              "miljø",
               "korrupsjon"
-            ]
-          },
-          {
-            "operator": "in",
-            "field": "risiko_nivaa",
-            "value": [
+            ],
+            "risk_levels": [
               "høy"
             ]
           }
@@ -1216,29 +1127,7 @@
         "activates_requirement_codes": [
           "AVVISNING_ETISKE_BRUDD"
         ],
-        "priority": 0,
-        "overrides_rules": [],
-        "valid_from": null,
-        "valid_until": null
-      },
-      {
-        "rule_id": "7.2-AVVISNING-OKKUPASJON",
-        "description": "Leverandør skal avvises ved medvirkning til å opprettholde ulovlig okkupasjon.",
-        "justification_reference": "jf. punkt 7.2",
-        "conditions": [
-          {
-            "operator": "in",
-            "field": "risiko_type",
-            "value": [
-              "ulovlig_okkupasjon"
-            ]
-          }
-        ],
-        "condition_logic": "AND",
-        "activates_requirement_codes": [
-          "AVVISNING_ETISKE_BRUDD"
-        ],
-        "priority": 0,
+        "priority": 100,
         "overrides_rules": [],
         "valid_from": null,
         "valid_until": null
@@ -1287,7 +1176,7 @@
     "rules": [
       {
         "rule_id": "regel_7_3_kravsett_a",
-        "description": "Kravsett A benyttes i anskaffelser av varer, tjenester, bygg og anlegg over 500 000 kr der det er høy risiko.",
+        "description": "Kravsett A benyttes i anskaffelser av varer, tjenester, bygg og anlegg over 500 000 kr der det er høy risiko for brudd på etiske retningslinjer.",
         "justification_reference": "jf. punkt 7.1",
         "conditions": [
           {
@@ -1301,14 +1190,22 @@
             ]
           },
           {
-            "operator": ">",
+            "operator": ">=",
             "field": "kontraktsverdi",
             "value": 500000
           },
           {
-            "operator": "=",
-            "field": "risiko_nivaa",
-            "value": "høy"
+            "field": "risiko",
+            "operator": "contains_any",
+            "risk_types": [
+              "menneskerettigheter-og-folkerett",
+              "arbeidstakerrettigheter",
+              "miljø",
+              "korrupsjon"
+            ],
+            "risk_levels": [
+              "høy"
+            ]
           }
         ],
         "condition_logic": "AND",
@@ -1380,14 +1277,22 @@
             ]
           },
           {
-            "operator": ">",
+            "operator": ">=",
             "field": "kontraktsverdi",
             "value": 500000
           },
           {
-            "operator": "=",
-            "field": "risiko_nivaa",
-            "value": "høy"
+            "field": "risiko",
+            "operator": "contains_any",
+            "risk_types": [
+              "menneskerettigheter-og-folkerett",
+              "arbeidstakerrettigheter",
+              "miljø",
+              "korrupsjon"
+            ],
+            "risk_levels": [
+              "høy"
+            ]
           },
           {
             "operator": "<",
@@ -1399,7 +1304,7 @@
         "activates_requirement_codes": [
           "AKTSOMHET-B"
         ],
-        "priority": 0,
+        "priority": 10,
         "overrides_rules": ["regel_7_3_kravsett_a"],
         "valid_from": null,
         "valid_until": null
@@ -1420,14 +1325,22 @@
             ]
           },
           {
-            "operator": ">",
+            "operator": ">=",
             "field": "kontraktsverdi",
             "value": 500000
           },
           {
-            "operator": "=",
-            "field": "risiko_nivaa",
-            "value": "høy"
+            "field": "risiko",
+            "operator": "contains_any",
+            "risk_types": [
+              "menneskerettigheter-og-folkerett",
+              "arbeidstakerrettigheter",
+              "miljø",
+              "korrupsjon"
+            ],
+            "risk_levels": [
+              "høy"
+            ]
           },
           {
             "operator": "=",
@@ -1439,7 +1352,7 @@
         "activates_requirement_codes": [
           "AKTSOMHET-B"
         ],
-        "priority": 0,
+        "priority": 10,
         "overrides_rules": ["regel_7_3_kravsett_a"],
         "valid_from": null,
         "valid_until": null

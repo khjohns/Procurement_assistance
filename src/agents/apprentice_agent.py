@@ -5,13 +5,24 @@ import uuid
 from typing import Dict, Any, List, Optional
 from pathlib import Path
 
+from pydantic import BaseModel, Field
+
 import structlog
 
 from src.models.base_models import (
     BaseProcurementInput, BaseAssessment, Requirement
 )
 
+from src.services.llm_gateway import LLMGateway, LLMStructuredResponseError
+
+
 logger = structlog.get_logger()
+
+class RelevantTradesResponse(BaseModel):
+    relevante_fagomraader: List[str] = Field(
+        ...,
+        description="En liste med de nøyaktige navnene på relevante fagområder fra den oppgitte listen."
+    )
 
 class ApprenticeAgent:
     """
@@ -29,13 +40,41 @@ class ApprenticeAgent:
         
         # Laster data for både hovedprogramområder og spesifikke fag
         self.udir_data_main_programs = self._load_udir_data(main_programs_only=True)
-        self.udir_data_specific_trades = self._load_udir_data(main_programs_only=False) # Kan aktiveres for dypere analyse
+        self.udir_data_specific_trades = self._load_udir_data(main_programs_only=False)
         
         kb_path = config.get('knowledge_base', {}).get('file_path')
         self.requirement_v_template: Optional[Requirement] = self._load_requirement_template(kb_path, "V")
         
         if not self.requirement_v_template:
-            logger.warning("Krav-definisjon 'V' (lærlinger) ikke funnet i kunnskapsbasen. Agenten vil ikke kunne aktivere kravet.")
+            logger.warning("Krav-definisjon 'V' (lærlinger) ikke funnet i kunnskapsbasen.")
+
+        # Initialiser LLMGateway hvis den er aktivert
+        self.llm_gateway: Optional[LLMGateway] = None
+        self.llm_config = self.config.get('llm', {})
+        
+        if self.llm_config.get('enabled'):
+            try:
+                # Import LLMGateway
+                from src.services.llm_gateway import LLMGateway
+                
+                # Initialiser LLM Gateway (bruker default config/llm_config.yaml)
+                self.llm_gateway = LLMGateway()
+                
+                # Hent prompt fra konfigurasjon (oslomodell_config.yaml)
+                self.extract_trades_prompt = self.llm_config.get('prompt_extract_trades', '')
+                
+                if not self.extract_trades_prompt:
+                    logger.warning("prompt_extract_trades not found in config, LLM extraction may fail")
+                
+                logger.info("ApprenticeAgent: LLMGateway enabled and initialized.")
+            except Exception as e:
+                logger.error("Failed to initialize LLMGateway", error=str(e))
+                self.llm_gateway = None
+                self.extract_trades_prompt = ''
+        else:
+            # LLM er ikke aktivert, sett prompt til tom streng
+            self.extract_trades_prompt = ''
+            logger.info("ApprenticeAgent: LLM disabled, using keyword-based trade detection")
 
     def _load_udir_data(self, main_programs_only: bool = True) -> Dict[str, float]:
         """
@@ -111,68 +150,52 @@ class ApprenticeAgent:
             return None
         return None
 
-    # assess-metoden er uendret.
-    async def assess(self, procurement: BaseProcurementInput) -> BaseAssessment:
-        """Kjører hele vurderingsprosessen for lærlingekrav."""
+    def create_assessment_from_llm_result(self, procurement: BaseProcurementInput, relevant_trades: List[str]) -> Optional[BaseAssessment]:
+        """
+        Bygger et fullverdig BaseAssessment-objekt basert på en liste med
+        identifiserte fagområder fra en LLM.
+        """
         assessment = BaseAssessment(
             procurement_id=procurement.procurement_id,
             procurement_name=procurement.name,
             agent_name="apprentice_agent",
-            confidence_score=1.0, # Start optimistisk
+            confidence_score=0.95, # Litt lavere siden den er LLM-basert
         )
-        
         log = logger.bind(procurement_id=procurement.procurement_id)
-        log.info("apprentice_assessment_started")
-
-        # Steg 1: Deterministisk sjekk av terskelverdier
-        log.info("step_1_checking_thresholds")
-        if procurement.value < self.config['threshold_value']:
-            reason = f"Anskaffelsens verdi ({procurement.value:,} NOK) er under terskelverdien ({self.config['threshold_value']:,} NOK)."
-            log.info("threshold_not_met_value", value=procurement.value)
-            assessment.reasoning_steps.append(reason)
-            return assessment
-
-        if procurement.duration_months < self.config['min_duration_months']:
-            reason = f"Varigheten ({procurement.duration_months} mnd) er under minimumskravet ({self.config['min_duration_months']} mnd)."
-            log.info("threshold_not_met_duration", duration=procurement.duration_months)
-            assessment.reasoning_steps.append(reason)
-            return assessment
-
-        assessment.reasoning_steps.append("Terskelverdier for verdi og varighet er møtt.")
         
-        # Steg 2 & 3 kombinert: Identifiser spesifikke fag og sjekk behov
-        log.info("step_2_3_identifying_trades_and_checking_need")
-        relevant_trades_with_need = self._find_relevant_trades_with_special_need(procurement.description)
+        assessment.reasoning_steps.append(f"LLM identifiserte relevante fagområder: {', '.join(relevant_trades)}.")
 
-        if not relevant_trades_with_need:
-            reason = "Ingen spesifikke, relevante fagområder med et dokumentert 'særlig behov' ble identifisert."
-            log.info("no_specific_trades_with_special_need_found")
-            assessment.reasoning_steps.append(reason)
-            return assessment
+        # Steg 3: Sjekk for "særlig behov" (logikk gjenbrukt)
+        trades_with_special_need = self._get_trades_with_special_need(relevant_trades)
+        if not trades_with_special_need:
+            assessment.reasoning_steps.append("Ingen av fagene har 'særlig behov'. Krav utløses ikke.")
+            return assessment # Returnerer et assessment uten krav
 
-        assessment.reasoning_steps.append(f"Fagområder med 'særlig behov' funnet: {', '.join(relevant_trades_with_need)}.")
+        assessment.reasoning_steps.append(f"Fagområder med 'særlig behov': {', '.join(trades_with_special_need)}.")
 
-        # Steg 4: Vurder uforholdsmessighet (plassholder)
-        log.info("step_4_checking_proportionality")
+        # Steg 4: Vurder uforholdsmessighet (logikk gjenbrukt)
         is_disproportionate, reason = self._check_proportionality(procurement.description)
-
         if is_disproportionate:
-            log.warning("proportionality_check_failed", reason=reason)
-            assessment.reasoning_steps.append(f"Kravet anses som uforholdsmessig: {reason}")
-            # VIKTIG: Vi nullstiller kravene fordi dette er en unntaksregel
-            assessment.applicable_requirements = []
-            assessment.recommendations = ["Det anbefales IKKE å stille krav om lærlinger på grunn av uforholdsmessighet."]
+            assessment.reasoning_steps.append(f"Kravet anses uforholdsmessig: {reason}")
             return assessment
 
-        # Konklusjon
-        log.info("assessment_successful_requirement_applies")
+        # Konklusjon: Alle sjekker bestått
         if self.requirement_v_template:
             assessment.applicable_requirements.append(self.requirement_v_template)
-            assessment.recommendations.append("Det anbefales å stille krav om lærlinger (Krav V) i denne anskaffelsen.")
-        else:
-            assessment.warnings.append("Lærlingekrav gjelder, men krav-mal 'V' kunne ikke lastes fra kunnskapsbasen.")
-
+            assessment.recommendations.append("Det anbefales å stille krav om lærlinger (Krav V).")
+        
         return assessment
+    
+
+    def _get_trades_with_special_need(self, trades: List[str]) -> List[str]:
+        """Gitt en liste med fag, returner de som har et 'særlig behov'."""
+        trades_with_need = []
+        for trade in trades:
+            if trade in self.udir_data_specific_trades:
+                andel = self.udir_data_specific_trades[trade]
+                if andel < self.config['special_need_threshold']:
+                    trades_with_need.append(trade)
+        return trades_with_need
 
     def _check_proportionality(self, description: str) -> (bool, str):
         """
@@ -196,16 +219,13 @@ class ApprenticeAgent:
                 
         return False, ""
 
-    def _find_relevant_trades_with_special_need(self, description: str) -> List[str]:
+    def _find_relevant_trades_with_keywords(self, description: str) -> List[str]:
         """
-        Identifiserer spesifikke fag fra beskrivelsen og sjekker om noen av dem
-        har et "særlig behov" for lærlinger.
+        Fallback-metode som bruker en enkel nøkkelord-mapping.
         """
-        found_trades_with_need = set()
+        found_trades = set()
         lower_desc = description.lower()
 
-        # Nøkkelord-mapping til offisielle UDIR-fagnavn (Nivå 3)
-        # Dette er mer detaljert enn før.
         keyword_map = {
             "rørlegger": "BARLF3 - Rørleggerfaget",
             "tømrer": "BATMF3 - Tømrerfaget",
@@ -222,53 +242,7 @@ class ApprenticeAgent:
         }
 
         for keyword, trade_name in keyword_map.items():
-            if keyword in lower_desc:
-                # Sjekk om dette faget har et særlig behov
-                if trade_name in self.udir_data_specific_trades:
-                    andel = self.udir_data_specific_trades[trade_name]
-                    if andel < self.config['special_need_threshold']:
-                        found_trades_with_need.add(trade_name)
+            if keyword in lower_desc and trade_name in self.udir_data_specific_trades:
+                found_trades.add(trade_name)
         
-        return list(found_trades_with_need)
-
-    def _identify_main_programs_from_description(self, description: str) -> List[str]:
-        """
-        Simulert/enkel funksjon for å identifisere hovedprogramområder.
-        Matcher nøkkelord mot de offisielle navnene fra UDIR-data.
-        """
-        found_programs = set()
-        # Nøkkelord-mapping til offisielle UDIR-programnavn (Nivå 2)
-        keyword_map = {
-            # Bygg og anlegg
-            "bygg": "Bygg- og anleggsteknikk", "anlegg": "Bygg- og anleggsteknikk",
-            "rørlegger": "Bygg- og anleggsteknikk", "tømrer": "Bygg- og anleggsteknikk",
-            "snekker": "Bygg- og anleggsteknikk", "murer": "Bygg- og anleggsteknikk",
-            "maler": "Bygg- og anleggsteknikk", "graving": "Bygg- og anleggsteknikk",
-            # Elektro
-            "elektro": "Elektro og datateknologi", "elektriker": "Elektro og datateknologi",
-            "data": "Elektro og datateknologi", "automasjon": "Elektro og datateknologi",
-            # IT
-            "it": "Informasjonsteknologi og medieproduksjon", "ikt": "Informasjonsteknologi og medieproduksjon",
-            "utvikling": "Informasjonsteknologi og medieproduksjon", "programmering": "Informasjonsteknologi og medieproduksjon",
-            # Restaurant og matfag
-            "mat": "Restaurant- og matfag", "kantine": "Restaurant- og matfag",
-            "kokk": "Restaurant- og matfag", "baker": "Restaurant- og matfag",
-            # Salg og service
-            "renhold": "Salg, service og reiseliv", # NB: Renholdsoperatørfaget ligger under Bygg/anlegg i filen, men la oss teste en annen kobling. Bør verifiseres.
-            "service": "Salg, service og reiseliv", "sikkerhet": "Salg, service og reiseliv", 
-            "vekter": "Salg, service og reiseliv",
-            # Helse
-            "helse": "Helse- og oppvekstfag", "ambulanse": "Helse- og oppvekstfag",
-            # Teknologi og industri
-            "industri": "Teknologi- og industrifag", "mekaniker": "Teknologi- og industrifag",
-            "sveise": "Teknologi- og industrifag", "logistikk": "Teknologi- og industrifag"
-        }
-        
-        lower_desc = description.lower()
-        for keyword, program in keyword_map.items():
-            if keyword in lower_desc:
-                # Sjekk at programmet faktisk finnes i våre data
-                if program in self.udir_data_main_programs:
-                    found_programs.add(program)
-        
-        return list(found_programs)
+        return list(found_trades)
