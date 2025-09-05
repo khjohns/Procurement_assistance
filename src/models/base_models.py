@@ -17,6 +17,30 @@ from .enums import (
 )
 
 # ==============================================================================
+# COMPANY ANALYSIS MODELS
+# ==============================================================================
+
+class CompanyRiskAssessment(BaseModel):
+    """En vurdering av en spesifikk risiko knyttet til et selskap."""
+    vurdering: str
+    begrunnelse: str
+
+class FinancialAnalysis(BaseModel):
+    """En finansiell analyse av et selskap."""
+    assessment: CompanyRiskAssessment
+    nokkeltall: Dict[str, str] = Field(default_factory=dict)
+
+class CompanyAnalysisResult(BaseModel):
+    """Resultatet fra en detaljert analyse av en leverandør."""
+    organisasjonsnummer: str
+    navn: str
+    bankruptcy_risk: CompanyRiskAssessment
+    financial_strength: FinancialAnalysis
+    management_stability: CompanyRiskAssessment
+    detailed_financials: List[Dict[str, Any]] = Field(default_factory=list)
+
+
+# ==============================================================================
 # RULE SYSTEM COMPONENTS
 # ==============================================================================
 # Define rule components first, as they're used by other models

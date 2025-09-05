@@ -1,0 +1,71 @@
+# config/procurement_note_structure.yaml
+# ===============================================
+# STRUKTUR OG REGLER FOR DOKUMENTET
+# ===============================================
+
+# Terskelverdier (NOK)
+thresholds:
+  protocol_required: 100000
+  formal_contract: 500000
+  competition_mandatory: 500000
+
+# Dokumentstruktur - hvilke seksjoner og når
+sections:
+  - id: "header"
+    always: true
+    
+  - id: "metadata"
+    always: true
+    
+  - id: "supplier_verification"
+    condition: "has_supplier"
+    
+  - id: "requirements"
+    always: true
+
+  - id: "risk_assessment"
+    always: true    
+    
+  - id: "specialist_assessments"
+    always: true
+    
+  - id: "process_guidance"
+    always: true
+    variants:
+      - condition: "has_supplier"
+        template: "process_with_supplier"
+      - condition: "no_supplier"
+        template: "process_without_supplier"
+    
+  - id: "resources"
+    always: true
+    
+  - id: "contact"
+    always: true
+
+# Formattering
+formatting:
+  line_breaks_between_sections: 0
+  line_breaks_after_heading: 0
+  table_alignment: "left"
+  list_style: "- "  # Bullet points
+  checklist_style: "- [ ] "
+  
+  # Markdown-spesifikke
+  heading_levels:
+    document_title: 1    # #
+    section_title: 2     # ##
+    subsection_title: 3  # ###
+  
+  emphasis:
+    strong: "**"
+    italic: "*"
+    code: "`"
+
+# NY SEKSJON: Definerer hvilke krav som skal detaljeres
+# i "Nærmere om utvalgte krav"-seksjonen.
+key_requirements_to_detail:
+  - "SKATT-UTV"
+  - "UL-MAX-1"
+  - "UL-UNNTAK-VURDERING"
+  - "V"

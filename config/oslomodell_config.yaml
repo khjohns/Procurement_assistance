@@ -30,7 +30,7 @@ logging:
   # - "INFO":    Standard. Viser viktige hendelser (start, stopp, utløste regler).
   # - "WARNING": Viser kun advarsler og feil.
   # - "ERROR":   Viser kun kritiske feil.
-  level: "INFO"
+  level: "info"
 
 # 4. Input-validering
 # -------------------
@@ -53,6 +53,15 @@ validation:
     - "vare"
     - "tjeneste"
     - "renhold"
+
+# ==============================================================================
+# NY SEKSJON FOR LEVERANDØRVERIFISERING
+# ==============================================================================
+supplier_verification_config:
+  # Hvis satt til true, vil agenten automatisk velge det første treffet fra
+  # Brønnøysund hvis det returneres flere resultater.
+  # Nyttig for testing og i scenarioer med høy grad av sikkerhet.
+  auto_select_first_match: true
 
 # ==============================================================================
 # NY SEKSJON FOR SELSKAPSANALYSE
@@ -100,10 +109,10 @@ apprentice_agent_config:
 
   # Innstillinger for bruk av store språkmodeller (LLM) for analyse.
   llm:
-    enabled: false # Sett denne til TRUE for å aktivere
+    enabled: true # Sett denne til TRUE for å aktivere
     llm_parameters:
       purpose: "fast_evaluation"
-      include_thoughts: false # Legger til denne som beskrevet i planen
+      include_thoughts: true # Legger til denne som beskrevet i planen
 
     prompt_extract_trades: |
       prompt_extract_trades: |
@@ -129,10 +138,10 @@ apprentice_agent_config:
 # -----------------------------------------------
 # Styrer den dynamiske vurderingen av risiko for brudd på menneskerettigheter.
 human_rights_and_law_agent_config:
-  enabled: false
+  enabled: true
   llm_parameters:
     purpose: "fast_evaluation"
-    include_thoughts: false
+    include_thoughts: true
 
   prompt: |
     Du er en ekspert på etiske retningslinjer, menneskerettigheter, OG internasjonal humanitærrett i globale leverandørkjeder.
@@ -170,10 +179,10 @@ human_rights_and_law_agent_config:
 # ---------------------------------------
 # Styrer den dynamiske vurderingen av risiko for korrupsjon.
 corruption_agent_config:
-  enabled: false
+  enabled: true
   llm_parameters:
     purpose: "fast_evaluation"
-    include_thoughts: false
+    include_thoughts: true
 
   # PROMPT: Spisset prompt for å identifisere korrupsjonsrisiko.
   prompt: |
@@ -206,11 +215,11 @@ corruption_agent_config:
 # ---------------------------------
 # Styrer den dynamiske vurderingen av risiko for negativ miljøpåvirkning.
 environment_agent_config:
-  enabled: false
+  enabled: true
   # Parametere for LLM-kallet.
   llm_parameters:
     purpose: "fast_evaluation"
-    include_thoughts: false
+    include_thoughts: true
 
   # PROMPT: Spisset prompt for å identifisere miljørisiko i leverandørkjeden.
   prompt: |
@@ -270,6 +279,7 @@ synthesis_agent_config:
     Start med en overordnet konklusjon om risikobildet, og forklar deretter *hvorfor* risikoene er vurdert som de er, ved å koble spesialistenes funn direkte til detaljene om anskaffelsen. Avslutt med en setning om hva dette betyr for behovet for oppfølging.
 
     **SAMLET AKTSOMHETSVURDERING:**
+
 
 # ==============================================================================
 # SEKSJON FOR TESTING OG UTVIKLING

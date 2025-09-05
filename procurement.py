@@ -1,4 +1,4 @@
-# main.py
+# procurement.py
 import yaml
 import asyncio
 import structlog
@@ -6,138 +6,77 @@ from typing import List
 from dotenv import load_dotenv
 import os
 import json
+import logging
 
 from datetime import datetime, timedelta
 
-# Konfigurer logging for pen output i konsollen
+# Konfigurer logging
 structlog.configure(
     processors=[
+        structlog.contextvars.merge_contextvars,
         structlog.processors.add_log_level,
-        structlog.processors.TimeStamper(fmt="iso"),
-        structlog.processors.JSONRenderer()
-    ]
+        structlog.processors.StackInfoRenderer(),
+        structlog.dev.set_exc_info,
+        structlog.processors.TimeStamper(fmt="%Y-%m-%d %H:%M:%S", utc=False),
+        # ConsoleRenderer er nøkkelen til pen output med farger
+        structlog.dev.ConsoleRenderer(),
+    ],
+    wrapper_class=structlog.make_filtering_bound_logger(min_level=logging.INFO),
+    context_class=dict,
+    logger_factory=structlog.PrintLoggerFactory(),
+    cache_logger_on_first_use=False
 )
 
-# Importer agent og modeller
+# Importer agenter og modeller
 from src.agents.oslomodell_agent import OslomodellAgent
-from src.agents.obs_list_agent import ObsListAgent
+from src.models.base_models import BaseProcurementInput, BaseAssessment, RiskAssessmentItem
+from src.models.enums import ProcurementCategory, ProcurementSubCategory, RiskType, RiskLevel
 
-from src.reporting.protocol_generator import ProtocolGenerator
-from src.reporting.report_converter import ReportConverter
-
-from src.services.brreg_service import BrregService
-
-from src.models.base_models import BaseProcurementInput, BaseAssessment
-from src.models.enums import ProcurementCategory, ProcurementSubCategory
-
-# --- Hjelpefunksjon for å printe resultater ---
-def print_assessment_summary(assessment: BaseAssessment):
-    """Printer en formatert oppsummering av en BaseAssessment."""
-    
-    print("\n" + "="*80)
-    print(f" VURDERINGS-RAPPORT FOR: {assessment.procurement_name}")
-    print(f" Anskaffelses-ID: {assessment.procurement_id}")
-    print(f" Vurderings-ID:    {assessment.assessment_id}")
-    print(f" Agent:             {assessment.agent_name}")
-    print(f" Vurderingstidspunkt: {assessment.assessment_date.strftime('%Y-%m-%d %H:%M:%S')}")
-    print("="*80)
-
-    # 1. Sammendrag av anvendelige krav
-    print(f"\n--- ANVENDELIGE KRAV ({len(assessment.applicable_requirements)}) ---")
-    if not assessment.applicable_requirements:
-        print("Ingen spesifikke krav ble aktivert.")
-    else:
-        for req in assessment.applicable_requirements:
-            print(f"  - [{req.code}] {req.name} (Kilde: {req.source.value}, Kategori: {req.category.value})")
-
-    # 2. Utløste regler
-    print(f"\n--- UTLØSTE REGLER ({len(assessment.triggered_rules)}) ---")
-    if not assessment.triggered_rules:
-        print("Ingen regler ble utløst.")
-    else:
-        for rule in assessment.triggered_rules:
-            print(f"  - Regel '{rule.rule_id}': {rule.description}")
-
-    # 3. Anbefalinger og advarsler
-    print("\n--- ANBEFALINGER OG ADVARSLER ---")
-    if assessment.recommendations:
-        print("Anbefalinger:")
-        for rec in assessment.recommendations:
-            print(f"  - {rec}")
-    if assessment.warnings:
-        print("Advarsler:")
-        for warn in assessment.warnings:
-            print(f"  - {warn}")
-    if not assessment.recommendations and not assessment.warnings:
-        print("Ingen spesifikke anbefalinger eller advarsler.")
-
-    # 4. Detaljert begrunnelse (Reasoning Steps)
-    print("\n--- DETALJERT BEGRUNNELSE (AGENTENS RESSENOMENT) ---")
-    if not assessment.reasoning_steps:
-        print("Ingen detaljert begrunnelse tilgjengelig.")
-    else:
-        for step in assessment.reasoning_steps:
-            print(f"  {step}")
-
-    print("\n" + "="*80 + "\n")
+# --- NYTT: Importer den nye notat-generatoren ---
+from src.generators.procurement_note_generator import ProcurementNoteGenerator
 
 async def process_single_procurement(
     procurement_input: BaseProcurementInput,
     agent: OslomodellAgent,
-    protocol_generator: ProtocolGenerator,
-    report_converter: ReportConverter,
+    note_generator: ProcurementNoteGenerator, # Ny parameter
     index: int
     ):
     """
-    Kjører hele prosessen for én enkelt anskaffelse.
-    Denne funksjonen er designet for å kunne kjøres parallelt med andre.
+    Kjører hele prosessen for én enkelt anskaffelse og genererer et anskaffelsesnotat.
     """
     print(f"\n--- Starter prosessering for test {index}: '{procurement_input.name}' ---")
+    log = structlog.get_logger().bind(procurement_name=procurement_input.name)
+    
     try:
-        # Steg 1: Kjør vurderingen
+        # Steg 1: Kjør den fulle agent-vurderingen
+        log.info("agent_assessment_started")
         assessment_result = await agent.assess(procurement_input)
-        print_assessment_summary(assessment_result)
+        log.info("agent_assessment_finished")
 
-
-        """
-        # Steg 2: Generer rapport-innhold
-        protocol_markdown = protocol_generator.generate(assessment_result, procurement_input)
+        # Steg 2: Generer anskaffelsesnotatet som en Markdown-fil
+        output_filename = f"anskaffelsesnotat_test_{index}.md" # <--- ENDRING: .md i stedet for .docx
+        log.info("note_generation_started", output_file=output_filename)
         
-        print("\n" + "="*80)
-        print(f"GENERERER RAPPORT-FILER FOR '{procurement_input.name}'...")
+        note_generator.generate(
+            procurement=procurement_input,
+            assessment=assessment_result,
+            output_path=output_filename
+        )
         
-        base_filename = f"rapport_test_{index}"
-        md_filename = base_filename + ".md"
-        
-        # Steg 3: Lagre filer (merk: fil-I/O er blokkerende, men fordelen er fortsatt stor)
-        with open(md_filename, "w", encoding="utf-8") as f:
-            f.write(protocol_markdown)
-        print(f"  - Markdown-fil lagret som '{md_filename}'")
+        print(f"✅ Vellykket! Anskaffelsesnotat generert: '{output_filename}'")
 
-        docx_filename = base_filename + ".docx"
-        pdf_filename = base_filename + ".pdf"
-        
-        pdf_font = protocol_generator.config.get("formatting", {}).get("pdf_font", "Calibri")
-
-        report_converter.to_docx(protocol_markdown, docx_filename)
-        print(f"  - Word-fil lagret som '{docx_filename}'")
-
-        report_converter.to_pdf(protocol_markdown, pdf_filename, font=pdf_font)
-        print(f"  - PDF-fil lagret som '{pdf_filename}'")
-        print("="*80 + "\n")
-        """
     except Exception as e:
-        print(f"FEIL under parallell prosessering av '{procurement_input.name}': {e}")
-        structlog.get_logger().exception("parallel_assessment_run_failed", procurement_name=procurement_input.name)
+        print(f"❌ FEIL under prosessering av '{procurement_input.name}': {e}")
+        log.exception("procurement_processing_failed")
 
 
 # ==============================================================================
-# OPPDATERT HOVEDFUNKSJON
+# HOVEDFUNKSJON
 # ==============================================================================
 async def main():
-    """Laster konfig, initialiserer agenten, og kjører alle tester parallelt."""
+    """Laster konfig, initialiserer agenter, og kjører alle tester."""
     
-    # 1. Last konfigurasjon (uendret)
+    # 1. Last konfigurasjon
     print("Laster konfigurasjon fra 'config/oslomodell_config.yaml'...")
     try:
         with open("config/oslomodell_config.yaml", 'r', encoding='utf-8') as f:
@@ -148,82 +87,103 @@ async def main():
 
     load_dotenv()
     
-    # 2. Initialiser agenter og verktøy (uendret)
-    print("Initialiserer OslomodellAgent og rapport-verktøy...")
+    # 2. Initialiser agenter og verktøy
+    print("Initialiserer OslomodellAgent og Notat-generator...")
     try:
         agent = OslomodellAgent(config)
-        protocol_generator = ProtocolGenerator("config/protocol_config.yaml")
-        report_converter = ReportConverter()
+        note_generator = ProcurementNoteGenerator()
     except Exception as e:
         print(f"FEIL: Kunne ikke initialisere: {e}")
         return
 
-
-    # ==============================================================================
-    # SEKSJON FOR TESTING AV OBS-LISTE AGENT
-    # ==============================================================================
-    print("\n" + "="*80)
-    print("INITIALISERER OG TESTER OBS-LISTE AGENT")
-    print("="*80)
-
-    # Gjenbruk http-klienten fra OslomodellAgent for effektivitet
-    brreg_service = BrregService(agent.http_client, config['external_services']['brreg_api_url'])
-    
-    # Initialiser den nye agenten med sti til datafilen
-    obs_agent = ObsListAgent(brreg_service, "data/OBS_listen.csv")
-
-    # Definer test-caser som dekker alle scenarioer
-    test_suppliers = [
-        {"name": "OSLOBYGG KF", "is_foreign": False}, # Forventer "OK"
-        {"name": "RENHOLD PLUSS AS", "is_foreign": False}, # Antatt treff i OBS-listen
-        {"name": "Aker", "is_foreign": False}, # Forventer "FLERE TREFF"
-        {"name": "Ikke Eksisterende Firma AS", "is_foreign": False}, # Forventer "FEIL"
-        {"name": "Global Construction Ltd", "is_foreign": True}, # Forventer "ADVARSEL" for utenlandsk
-    ]
-    
-    print("\nKjører verifisering for flere leverandører...")
-    for supplier in test_suppliers:
-        print(f"\n--- Sjekker: '{supplier['name']}' (Utenlandsk: {supplier['is_foreign']}) ---")
-        result = await obs_agent.verify_supplier(supplier['name'], supplier['is_foreign'])
-        print(result)
-        print("----------------------------------------------------")
-
-
-    # 3. Definer alle test-anskaffelser (uendret)
+    # Definer varierte test-caser
     print("Definerer test-anskaffelser...")
     test_procurements: List[BaseProcurementInput] = [
-        # TEST A: Vare med høy risiko for menneskerettigheter
-        # Forventer: Menneskerettighetsrisiko -> HØY (fra mock_logic)
-        #            Korrupsjonsrisiko -> MODERAT (fra mock_risk_assessment)
-        #            AKTSOMHET-A skal utløses.  
+        # TEST A: Høyrisiko Bygg & Anlegg
         BaseProcurementInput(
-            name="Test A: Innkjøp av 1000 nettbrett til sykehjem",
-            value=1_500_000,
+            name="Rehabilitering av Storgata Skole",
+            value=25_000_000,
+            category=ProcurementCategory.CONSTRUCTION,
+            duration_months=18,
+            description="Totalrehabilitering av skolebygg. Omfatter tømrer, rørlegger, og elektrikerarbeid, samt utskifting av ventilasjonsanlegg.",
+            requested_by="Eiendomsetaten",
+            case_number="24/812",
+            risk_assessments=[
+                RiskAssessmentItem(type=RiskType.LABOR_CRIME, level=RiskLevel.HIGH),
+                RiskAssessmentItem(type=RiskType.SOCIAL_DUMPING, level=RiskLevel.HIGH)
+            ]
+        ),
+        
+        # TEST B: Lavverdi Varekjøp
+        BaseProcurementInput(
+            name="Innkjøp av kontorrekvisita for 2025",
+            value=80_000,
             category=ProcurementCategory.GOODS,
-            duration_months=4,
-            description="Anskaffelse av nettbrett for pasientkommunikasjon. Elektronikk har kjente utfordringer i leverandørkjeden.",
-            requested_by="Helseetaten",
-            case_number="25/201",
-        )
-        ]
+            duration_months=1,
+            description="Standard kontorrekvisita som penner, papir og permer til administrasjonen.",
+            requested_by="Servicesenteret",
+            case_number="24/813",
+        ),
+        
+        # TEST C: Tjeneste med spesialregel (Reservert kontrakt)
+        BaseProcurementInput(
+            name="Ny fruktordning for Rådhuset",
+            value=600_000,
+            category=ProcurementCategory.SERVICE,
+            subcategory=ProcurementSubCategory.FRUIT,
+            duration_months=12,
+            description="Levering av fruktkurver til ansatte i Rådhuset, to ganger i uken.",
+            requested_by="Byrådsavdelingen",
+            case_number="24/814",
+            risk_assessments=[
+                RiskAssessmentItem(type=RiskType.SOCIAL_DUMPING, level=RiskLevel.MEDIUM)
+            ]
+        ),
+        # TEST D: Direkteanskaffelse, middels verdi (med leverandør)
+        BaseProcurementInput(
+            name="Innkjøp av konsulentbistand til prosjekt X",
+            value=250_000,
+            category=ProcurementCategory.SERVICE,
+            duration_months=3,
+            description="Spesialisert teknisk bistand...",
+            requested_by="IT-avdelingen",
+            case_number="24/815",
+            # --- KORREKSJON: Bruk et ekte firmanavn for entydig treff ---
+            supplier_name_to_verify="Atea AS",
+            risk_assessments=[
+                RiskAssessmentItem(type=RiskType.SOCIAL_DUMPING, level=RiskLevel.LOW)
+            ]
+        ),
 
-    print(f"\n{'='*30} STARTER PARALLELL PROSESSERING AV {len(test_procurements)} ANSKAFFELSER {'='*30}")
+        # TEST E: Direkteanskaffelse, høy verdi (med leverandør)
+        BaseProcurementInput(
+            name="Hasteutbedring av vannlekkasje",
+            value=750_000,
+            category=ProcurementCategory.CONSTRUCTION,
+            duration_months=1,
+            description="Akutt reparasjon av rørbrudd...",
+            requested_by="Driftsavdelingen",
+            case_number="24/902",
+            # --- KORREKSJON: Bruk et ekte firmanavn for entydig treff ---
+            supplier_name_to_verify="Betonmast Oslo AS",
+            risk_assessments=[
+                RiskAssessmentItem(type=RiskType.SOCIAL_DUMPING, level=RiskLevel.LOW)
+            ]
+        )
+    ]
+
+    print(f"\n{'='*30} STARTER PROSESSERING AV {len(test_procurements)} ANSKAFFELSER {'='*30}")
     
-    # Lag en liste med oppgaver, én for hver anskaffelse
     tasks = [
-        process_single_procurement(proc, agent, protocol_generator, report_converter, i + 1)
+        process_single_procurement(proc, agent, note_generator, i + 1)
         for i, proc in enumerate(test_procurements)
     ]
     
-    # Kjør alle oppgavene samtidig og vent til alle er ferdige
     await asyncio.gather(*tasks)
     
-    print(f"\n{'='*30} PARALLELL PROSESSERING FULLFØRT {'='*30}")
+    print(f"\n{'='*30} PROSESSERING FULLFØRT {'='*30}")
     
-    # 5. Rens opp ressurser
     await agent.http_client.aclose()
 
-
 if __name__ == "__main__":
-    # Kjør async hovedfunksjon
     asyncio.run(main())

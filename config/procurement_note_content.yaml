@@ -1,0 +1,314 @@
+# config/procurement_note_content.yaml
+# ===============================================
+# ALL TEKST FOR ANSKAFFELSESNOTATET
+# ===============================================
+
+# Dokumenttitler
+titles:
+  main: "ANSKAFFELSESNOTAT"
+  sections:
+    metadata: "1. Oppsummering av Anskaffelsen"
+    supplier: "2. Vurdering av Foreslått Leverandør"
+    requirements: "3. Vurdering og Anvendelige Krav"
+    specialists: "4. Spesialistvurderinger"
+    process: "5. Veiledning for Videre Prosess"
+    resources: "6. Ressurser og Sentrale Dokumenter"
+    contact: "7. Kontakt og Forbehold"
+
+# Statiske tekster
+static_texts:
+  intro: >
+    Dette notatet er en automatisert vurdering og veiledning basert på 
+    informasjonen du har oppgitt:
+  
+  disclaimer: >
+    Denne veiledningen er generert automatisk og er ment som en støtte. 
+    Den erstatter ikke behovet for faglige og forretningsmessige vurderinger.
+  
+  contact_text: >
+    Er du usikker på noe? Kontakt alltid Juridisk avdeling (JA) for bistand. 
+    De kan hjelpe med alt fra konkurranse-vurderinger til valg av riktig kontraktsmal.
+
+# Advarsler og meldinger (med emoji)
+warnings:
+  critical_supplier:
+    icon: "⚠️"
+    title: "KRITISK ADVARSEL: Potensielt alvorlig avvik funnet"
+    text: >
+      Vår kontroll indikerer at leverandøren eller dens morselskap kan være 
+      listet på Oslomodellens OBS-liste eller internasjonale sanksjonslister.
+    action: "Anskaffelsen må ikke fortsette før funnene under er gjennomgått og avklart med Juridisk avdeling."
+  
+  threshold_500k:
+    icon: "🔴"
+    title: "KRITISK"
+    text: >
+      Anskaffelsen er over 500.000 kr. Direkte tildeling er normalt ikke tillatt 
+      og krever at vilkårene for unntak fra kunngjøring er oppfylt (f.eks. enerett).
+    action: "Kontakt Juridisk avdeling umiddelbart før du går videre."
+  
+  threshold_100k:
+    icon: "🟡"
+    title: "ADVARSEL"
+    text: >
+      Anskaffelsens verdi er over 100.000 kr. Hovedregelen er at konkurranse 
+      skal gjennomføres for å sikre effektiv ressursbruk.
+    details: >
+      En direkte tildeling krever en særskilt begrunnelse. Du må dokumentere 
+      hvorfor konkurranse ikke er gjennomført i anskaffelsesprotokollen.
+  
+  threshold_under_100k:
+    icon: "🟢"
+    title: "OK"
+    text: "Anskaffelsens verdi er under 100.000 kr. Direkte tildeling er normalt akseptabelt."
+    details: "Protokoll er ikke påkrevd."
+
+# Prosessveiledning - tekster
+process_guidance:
+  intro: >
+    For å sikre en korrekt og effektiv prosess, anbefales følgende trinn i henhold til 
+    Oslobyggs "Prosedyre for enkeltanskaffelser (836-13)":
+  
+  phases:
+    direct_assessment:
+      title: "Fase 1: Vurdering av Direkteanskaffelse"
+      steps:
+        competition:
+          text: "Vurder Konkurranseplikt"
+          details_high: "Anskaffelsen krever formell konkurranse eller særskilt begrunnelse for unntak."
+          details_medium: "Konkurranse bør vurderes for å sikre effektiv ressursbruk."
+          details_low: "Direkte tildeling er akseptabelt ved denne verdien."
+        
+        habilitet:
+          text: "Gjennomfør Habilitetsvurdering"
+          details: "Selv ved direkte tildeling må habiliteten til de involverte vurderes."
+    
+    preparation:
+      title: "Fase 1: Forberedelser"
+      steps:
+        framework:
+          text: "Kontroller Rammeavtaler"
+          details: "Før du starter en ny prosess, sjekk om behovet er dekket av eksisterende avtaler."
+        
+        habilitet:
+          text: "Gjennomfør Habilitetsvurdering"
+          details: "Alle involverte i anskaffelsen må vurdere sin habilitet."
+    
+    competition:
+      title: "Fase 2: Konkurranse og Dokumentasjon"
+      steps:
+        assess_need:
+          text: "Vurder Behov for Konkurranse"
+          requirement_500k: "For anskaffelser over 500.000 kr er konkurranse påkrevd. Minimum 3 leverandører."
+          recommendation: "Hovedregelen er at konkurranse skal arrangeres så langt det er mulig."
+        
+        tender_docs:
+          text: "Utarbeid Konkurransegrunnlag"
+          details: "Bruk malen for tilbudsinnbydelse for å sikre alle elementer er med."
+        
+        protocol:
+          text: "Opprett og Før Anskaffelsesprotokoll"
+          details: "Det skal føres protokoll for alle anskaffelser over 100.000 kr."
+    
+    contract:
+      title: "Fase 3: Kontrakt"
+      steps:
+        formal_contract:
+          text: "Utarbeid Formell Kontrakt"
+          requirements:
+            - "Innhent skatteattest (ikke eldre enn 6 mnd)"
+            - "Sørg for signatur fra person med fullmakt"
+            - "Inkluder alle identifiserte krav"
+        
+        order_letter:
+          text: "Utarbeid Bestillingsbrev"
+          details: "Et signert bestillingsbrev er tilstrekkelig for anskaffelser under 500.000 kr."
+
+# Dokumentreferanser
+documents:
+  procedures:
+    main:
+      name: "Prosedyre for enkeltanskaffelser"
+      id: "836-13"
+      url: "#"
+    
+    habilitet:
+      name: "Veiledning habilitetsvurdering"
+      url: "#"
+    
+    habilitet_form:
+      name: "Skjema for habilitetsvurdering"
+      url: "#"
+  
+  templates:
+    protocol:
+      name: "Protokoll for anskaffelse uten kunngjøring"
+      id: "999-4"
+      url: "#"
+    
+    tender:
+      name: "Tilbudsinnbydelse"
+      id: "1155-6"
+      url: "#"
+    
+    orders:
+      goods:
+        name: "Bestillingsbrev (Varer)"
+        id: "1606-1"
+        url: "#"
+      services:
+        name: "Bestillingsbrev (Tjenester)"
+        id: "1605-1"
+        url: "#"
+      construction:
+        name: "Bestillingsbrev (Bygg/Anlegg)"
+        id: "1604-1"
+        url: "#"
+  
+  agreements:
+    framework:
+      name: "Samkjøpsavtaler A-Å (FEL)"
+      url: "#"
+    oslobygg:
+      name: "Rammeavtaler i Oslobygg (OBF)"
+      url: "#"
+  
+  authority:
+    matrix:
+      name: "Fullmaktsmatrise Oslobygg KF"
+      id: "634-14"
+      url: "#"
+
+# Spesialistvurderinger - tekster
+specialist_texts:
+  intro: "En analyse av risiko for brudd på grunnleggende rettigheter i leverandørkjeden er utført:"
+  
+  human_rights:
+    title: "Menneskerettigheter og Folkerett"
+    risk_labels:
+      low: "Lav risiko"
+      moderate: "Moderat risiko"
+      high: "Høy risiko"
+  
+  corruption:
+    title: "Korrupsjon"
+    risk_labels:
+      low: "Lav risiko"
+      moderate: "Moderat risiko"
+      high: "Høy risiko"
+  
+  environment:
+    title: "Miljøødeleggelse"
+    risk_labels:
+      low: "Lav risiko"
+      moderate: "Moderat risiko"
+      high: "Høy risiko"
+  
+  apprentice:
+    title: "Krav til Bruk av Lærlinger"
+    applicable: "En analyse viser at anskaffelsen er egnet for bruk av lærlinger."
+    not_applicable: "Anskaffelsen oppfyller ikke vilkårene for å stille krav om bruk av lærlinger."
+    requirement_activated: "Krav V (Krav til bruk av lærlinger) er aktivert for denne anskaffelsen."
+
+# Leverandørvurdering - tekster
+supplier_texts:
+  intro: "En automatisk kontroll er utført for"
+  
+  company_info:
+    title: "Firmainformasjon (Brønnøysund)"
+    fields:
+      name: "Offisielt Navn"
+      orgnr: "Organisasjonsnummer"
+      employees: "Antall ansatte"
+      financial: "Finansiell vurdering"
+    
+    signature_note: "📝 **Merk:** Kontroller at kontrakt/bestillingsbrev signeres av de som har fullmakt til dette."
+  
+  list_check:
+    title: "Kontroll mot OBS- og Sanksjonslister"
+    headers:
+      list: "Liste"
+      status: "Status"
+      details: "Detaljer"
+    lists:
+      obs: "Oslomodellens OBS-liste"
+      sanctions: "EUs Sanksjonsliste"
+    statuses:
+      ok: "✅ Ikke funnet"
+      warning: "⚠️ Funnet på listen"
+      error: "❌ Kontroll feilet"
+
+
+# NY SEKSJON: Definerer gruppene for "Overordnede rammer"-tabellen
+requirement_groups:
+  Seriøsitetskrav:
+    - A
+    - B
+    - C
+    - D
+    - E
+    - F
+    - G
+    - H
+    - I
+    - J
+    - K
+    - L
+    - M
+    - N
+    - O
+    - P
+    - Q
+    - R
+    - S
+    - T
+    - U
+    - V
+  Leverandørkjede:
+    - UL-MAX-0
+    - UL-MAX-1
+    - UL-MAX-2
+    - UL-UNNTAK-VURDERING
+  Aktsomhetsvurderinger:
+    - AKTSOMHET-A
+    - AKTSOMHET-B
+  Dokumentasjonskrav:
+    - SKATT-STD
+    - SKATT-UTV
+  Sosiale Krav:
+    - RESERVERT-KONTRAKT-PLIKT
+    - RESERVERT-KONTRAKT-VURDERING
+
+# NY SEKSJON: Detaljerte tekster for utvalgte krav
+detailed_requirement_texts:
+  default: "**{req_name}:** {req_description}"
+
+  SKATT-UTV: "**{req_name}:** {req_description} (Utvidet skatteattest må være innhentet og kontrollert før kontraktsignering. Kontakt avdeling for arbeidslivvseriøsitet (ASER) for bistand.)"
+  
+  UL-MAX-1: "**{req_name}:** {req_description}"
+  
+  UL-UNNTAK-VURDERING: "**{req_name}:** {req_description}"
+
+  V: "**{req_name}:** {req_description} Kontrakten omfatter fagområder med et 'særlig behov': **{apprentice_trades}**."
+
+# NY SEKSJON: Tekster for risikovurderings-delen
+risk_assessment_texts:
+  title: "Risiko- og aktsomhetsvurderinger"
+  
+  intro_p1: "I henhold til Instruks for Oslo kommunes anskaffelser pkt. 7.1 skal det foretas en risikovurdering for brudd på menneskerettigheter, arbeidstakerrettigheter, internasjonal humanitærrett, miljøødeleggelse eller korrupsjon."
+  intro_p2: "Denne anskaffelsen er vurdert å ha {risk_details}. Se vedlegg x «Aktsomhetsvurdering» for ytterligere detaljer."
+
+  non_goods_intro: "Enkelte krav etter Oslomodellen utløses hvis det foreligger *risiko* eller *høy risiko* for arbeidslivskriminalitet eller sosial dumping."
+  non_goods_details: "Anskaffelsen gjelder **{procurement_category}**. Kategorien er vurdert å samlet sett ha **{category_risk_level}** risiko."
+
+standard_texts:
+  no_requirements_under_100k: "Ingen krav er automatisk identifisert. Særskilte krav i henhold til anskaffelsesregelverket eller Oslo kommunes instrukser gjelder i hovedsak for anskaffelser med anslått verdi fra 100 000 NOK (ekskl. mva)."
+
+  # NY SEKSJON: Tekster for avslutning og kontaktinfo
+contact_section:
+  title: "Kontakt og forbehold"
+  disclaimer: >
+    Denne veiledningen er generert automatisk og er ment som en støtte for å sikre etterlevelse av gjeldende regelverk. 
+    Den erstatter ikke behovet for faglige og forretningsmessige vurderinger i den enkelte anskaffelse.
+  contact_text: >
+    Er du usikker på noe? Kontakt alltid Juridisk avdeling (JA) for bistand.

@@ -140,7 +140,7 @@
         {
           "code": "UL-MAX-1",
           "name": "Begrensning til ett ledd underleverandører",
-          "description": "Hovedregel for anskaffelser med risiko for arbeidslivskriminalitet.",
+          "description": "Kravet gjelder som hovedregel for anskaffelser med risiko for arbeidslivskriminalitet.",
           "source": "oslomodellen", "category": "leverandørkjede", "type": "kontraktskrav", "modality": "obligatorisk",
           "parameters": { "max_subcontractor_levels": 1 }
         },
@@ -193,7 +193,7 @@
           "code": "SKATT-UTV",
           "name": "Krav om utvidet skatteattest",
           "description": "Krav om utvidet skatteattest som en del av Oslomodellens seriøsitetskrav T.",
-          "source": "oslomodellen", "category": "dokumentasjon", "type": "kvalifikasjonskrav", "modality": "obligatorisk",
+          "source": "oslomodellen", "category": "dokumentasjon", "type": "minimumskrav", "modality": "obligatorisk",
           "parameters": {
             "attest_type": "utvidet",
             "max_age_months": 6,

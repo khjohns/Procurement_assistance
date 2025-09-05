@@ -9,22 +9,9 @@ import structlog
 from pydantic import BaseModel, Field
 
 from src.services.brreg_service import ComprehensiveCompanyInfo, BrregCompanyDetails, BrregSignatureInfo
+from src.models.base_models import CompanyAnalysisResult, FinancialAnalysis, CompanyRiskAssessment
 
 logger = structlog.get_logger()
-
-# --- Pydantic-modeller for analyseresultater (utvidet) ---
-class RiskAssessment(BaseModel):
-    vurdering: str; begrunnelse: str
-class FinancialAnalysis(BaseModel):
-    assessment: RiskAssessment; nokkeltall: Dict[str, str] = Field(default_factory=dict)
-
-class CompanyAnalysisResult(BaseModel):
-    organisasjonsnummer: str; navn: str
-    bankruptcy_risk: RiskAssessment
-    financial_strength: FinancialAnalysis
-    management_stability: RiskAssessment
-    # NY: Et nytt felt for å holde på de detaljerte tallene
-    detailed_financials: List[Dict[str, Any]] = Field(default_factory=list)
 
 class CompanyAnalyzer:
     def __init__(self, config: Dict[str, Any]):
@@ -65,23 +52,23 @@ class CompanyAnalyzer:
         log.info("analyzer.analyze.success"); return analysis_result
 
     # ... (_analyze_bankruptcy_risk, _analyze_management_stability, _analyze_financial_strength, _get_score er uendret) ...
-    def _analyze_bankruptcy_risk(self, details: BrregCompanyDetails) -> RiskAssessment:
-        if details.konkurs: return RiskAssessment(vurdering="KRITISK", begrunnelse="Selskapet er registrert som konkurs.")
-        if details.underTvangsavviklingEllerTvangsopplosning: return RiskAssessment(vurdering="HØY", begrunnelse="Selskapet er under tvangsavvikling eller tvangsoppløsning.")
-        if details.underAvvikling: return RiskAssessment(vurdering="MIDDELS", begrunnelse="Selskapet er under frivillig avvikling.")
-        return RiskAssessment(vurdering="LAV", begrunnelse="Ingen aktive flagg for konkurs, avvikling eller tvangsoppløsning funnet.")
+    def _analyze_bankruptcy_risk(self, details: BrregCompanyDetails) -> CompanyRiskAssessment:
+        if details.konkurs: return CompanyRiskAssessment(vurdering="KRITISK", begrunnelse="Selskapet er registrert som konkurs.")
+        if details.underTvangsavviklingEllerTvangsopplosning: return CompanyRiskAssessment(vurdering="HØY", begrunnelse="Selskapet er under tvangsavvikling eller tvangsoppløsning.")
+        if details.underAvvikling: return CompanyRiskAssessment(vurdering="MIDDELS", begrunnelse="Selskapet er under frivillig avvikling.")
+        return CompanyRiskAssessment(vurdering="LAV", begrunnelse="Ingen aktive flagg for konkurs, avvikling eller tvangsoppløsning funnet.")
 
-    def _analyze_management_stability(self, signature_info: Optional[BrregSignatureInfo]) -> RiskAssessment:
-        if not signature_info or not signature_info.roller: return RiskAssessment(vurdering="UKJENT", begrunnelse="Rolledata er ikke tilgjengelig.")
+    def _analyze_management_stability(self, signature_info: Optional[BrregSignatureInfo]) -> CompanyRiskAssessment:
+        if not signature_info or not signature_info.roller: return CompanyRiskAssessment(vurdering="UKJENT", begrunnelse="Rolledata er ikke tilgjengelig.")
         board_members = signature_info.roller.get("Styremedlem", []); board_leader = signature_info.roller.get("Styrets leder", []); total_board_size = len(board_members) + len(board_leader)
-        if total_board_size >= 3: return RiskAssessment(vurdering="NORMAL", begrunnelse=f"Styret har 3 eller flere medlemmer ({total_board_size} totalt).")
-        if total_board_size > 0: return RiskAssessment(vurdering="MINIMAL", begrunnelse=f"Styret har færre enn 3 medlemmer ({total_board_size} totalt).")
-        return RiskAssessment(vurdering="MANGLER", begrunnelse="Ingen styremedlemmer er registrert.")
+        if total_board_size >= 3: return CompanyRiskAssessment(vurdering="NORMAL", begrunnelse=f"Styret har 3 eller flere medlemmer ({total_board_size} totalt).")
+        if total_board_size > 0: return CompanyRiskAssessment(vurdering="MINIMAL", begrunnelse=f"Styret har færre enn 3 medlemmer ({total_board_size} totalt).")
+        return CompanyRiskAssessment(vurdering="MANGLER", begrunnelse="Ingen styremedlemmer er registrert.")
 
     def _analyze_financial_strength(self, financials: Optional[Dict[str, Any]]) -> FinancialAnalysis:
         if not financials:
             logger.warning("analyzer.financial_analysis.missing_data")
-            return FinancialAnalysis(assessment=RiskAssessment(vurdering="UKJENT", begrunnelse="Regnskapsdata for siste år er ikke tilgjengelig."), nokkeltall={})
+            return FinancialAnalysis(assessment=CompanyRiskAssessment(vurdering="UKJENT", begrunnelse="Regnskapsdata for siste år er ikke tilgjengelig."), nokkeltall={})
         try:
             egenkapital = financials.get("egenkapitalGjeld", {}).get("egenkapital", {}).get("sumEgenkapital", 0)
             eiendeler = financials.get("eiendeler", {}).get("sumEiendeler", 0)
@@ -98,10 +85,10 @@ class CompanyAnalyzer:
             score_map = {"KRITISK": 0, "SVAK": 1, "TILFREDSSTILLENDE": 2, "GOD": 3, "MEGET GOD": 4}
             final_assessment_str = min([soliditet_score, likviditet_score, resultatgrad_score], key=lambda x: score_map.get(x, 0))
             begrunnelse = f"Samlet vurdering basert på Soliditet: {soliditet_score}, Likviditet: {likviditet_score}, og Resultatgrad: {resultatgrad_score}."
-            return FinancialAnalysis(assessment=RiskAssessment(vurdering=final_assessment_str, begrunnelse=begrunnelse), nokkeltall={"Soliditet": f"{soliditet:.1f}%", "Likviditetsgrad": f"{likviditetsgrad:.2f}", "Resultatgrad": f"{resultatgrad:.1f}%"})
+            return FinancialAnalysis(assessment=CompanyRiskAssessment(vurdering=final_assessment_str, begrunnelse=begrunnelse), nokkeltall={"Soliditet": f"{soliditet:.1f}%", "Likviditetsgrad": f"{likviditetsgrad:.2f}", "Resultatgrad": f"{resultatgrad:.1f}%"})
         except Exception as e:
             logger.error("analyzer.financial_analysis.failed", error=str(e), exc_info=True)
-            return FinancialAnalysis(assessment=RiskAssessment(vurdering="FEIL", begrunnelse=f"En feil oppstod under finansiell analyse: {e}"), nokkeltall={})
+            return FinancialAnalysis(assessment=CompanyRiskAssessment(vurdering="FEIL", begrunnelse=f"En feil oppstod under finansiell analyse: {e}"), nokkeltall={})
 
     def _get_score(self, value: float, tiers: Dict[str, float]) -> str:
         if value < tiers.get('kritisk', float('-inf')): return "KRITISK"

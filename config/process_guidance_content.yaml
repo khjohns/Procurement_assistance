@@ -1,0 +1,126 @@
+# config/process_guidance_content.yaml
+process_guidance:
+  intro:
+    text: "For å sikre en korrekt og effektiv prosess, anbefales følgende trinn i henhold til {procedure_link}:"
+    procedure_name: "Prosedyre for enkeltanskaffelser"
+    procedure_id: "836"
+
+  # =================================================
+  # NY SEKSJON: SCENARIO A: LEVERANDØR ER VALGT
+  # =================================================
+  with_supplier:
+    phase_1:
+      title: "Fase 1: Vurdering av Direkteanskaffelse"
+      steps:
+        competition_assessment:
+          number: 1
+          title: "Vurder Konkurranseplikt"
+          thresholds:
+            over_500k:
+              icon: "🔴"
+              title: "KRITISK"
+              main_text: "Anskaffelsen er over 500.000 kr. Direkte tildeling er normalt ikke tillatt og krever at vilkårene for unntak fra kunngjøring er oppfylt (f.eks. enerett)."
+              action: "Kontakt Juridisk avdeling umiddelbart før du går videre."
+              documentation_note: "Du må dokumentere hvorfor konkurranse ikke er gjennomført i anskaffelsesprotokollen. Gyldige grunner kan være teknisk eksklusivitet, uforutsette omstendigheter, eller enerett."
+            over_100k:
+              icon: "🟡"
+              title: "ADVARSEL"
+              main_text: "Anskaffelsens verdi er over 100.000 kr. Hovedregelen er at konkurranse skal gjennomføres for å sikre effektiv ressursbruk."
+              supplier_specific: "En direkte tildeling til **{supplier_name}** krever en særskilt begrunnelse."
+              documentation_note: "Du må dokumentere hvorfor konkurranse ikke er gjennomført i anskaffelsesprotokollen (se Trinn 3)."
+            under_100k:
+              icon: "🟢"
+              title: "OK"
+              main_text: "Anskaffelsens verdi er under 100.000 kr. Direkte tildeling til **{supplier_name}** er normalt akseptabelt."
+              additional: "Protokoll er ikke påkrevd."
+        habilitet:
+          number: 2
+          title: "Gjennomfør Habilitetsvurdering"
+          main_text: "Selv ved direkte tildeling, må habiliteten til de involverte i Oslobygg vurderes."
+          resources:
+            - { name: "Veiledning habilitetsvurdering", id: "686" }
+            - { name: "Skjema for habilitetsvurdering", id: "687" }
+    phase_2:
+      title: "Fase 2: Kontrakt og Protokoll"
+      steps:
+        protocol:
+          number: 3
+          title: "Opprett og Fyll ut Anskaffelsesprotokoll"
+          main_text: "Det skal føres protokoll for alle anskaffelser over 100.000 kr."
+          important_note: "**Spesielt viktig her:** Begrunnelsen for valg av leverandør og hvorfor konkurranse eventuelt ikke ble avholdt, må dokumenteres grundig."
+          template: { name: "Protokoll for anskaffelse uten kunngjøring", id: "999-4" }
+        contract:
+          number: 4
+          title: "Inngå Kontrakt/Bestilling"
+          variants:
+            formal_contract:
+              text: "Det skal skrives en formell kontrakt."
+              requirements:
+                - "Innhent skatteattest fra leverandøren (ikke eldre enn 6 mnd)"
+                - "Sørg for at kontrakt inkluderer alle identifiserte krav"
+                - "Kontroller signaturrett hos leverandøren"
+            order_letter:
+              text: "Et signert bestillingsbrev er tilstrekkelig."
+              note: "Velg relevant mal basert på kategori."
+          signature_reminder: "**Husk signaturrett:** Sørg for at riktig person hos leverandøren signerer (se punkt 2 over)."
+
+  # =================================================
+  # SCENARIO B: LEVERANDØR ER IKKE VALGT
+  # =================================================
+  standard_guidance:
+    phase_1:
+      title: "Fase 1: Forberedelser"
+      steps:
+        framework_check:
+          number: 1
+          title: "Kontroller rammeavtaler"
+          description: "Kontroller om behovet allerede er dekket av en eksisterende {link_rammeavtale} eller {link_samkjop}."
+          resources:
+            rammeavtale: { name: "rammeavtale", url: "https://obfintranett-oslokommune.msappproxy.net/fagstotte/innkjop/rammeavtaler-i-oslobygg/" }
+            samkjop: { name: "samkjøpsavtale", url: "https://felles.intranett.oslo.kommune.no/anskaffelser-og-samkjopsavtaler/samkjopsavtaler/" }
+        habilitet:
+          number: 2
+          title: "Gjennomfør habilitetsvurdering"
+          description: "Se {link_veiledning} og {link_sjekkliste}"
+          resources:
+            veiledning: { name: "686-3 Veiledning til habilitetsvurdering", id: "686" }
+            sjekkliste: { name: "687-5 Sjekkliste vurdering av habilitet", id: "687" }
+    phase_2:
+      title: "Fase 2: Konkurranse og dokumentasjon"
+      steps:
+        competition_need:
+          number: 3
+          title: "Vurder behov for konkurranse"
+          description_over_500k: "For anskaffelser over 500.000 kr er konkurranse et krav. Hovedregelen er å invitere minimum 3 leverandører."
+          description_under_500k: "For anskaffelser under 500.000 kr er hovedregelen fortsatt at konkurranse skal arrangeres så langt det er mulig."
+        protocol:
+          number: 4
+          title: "Opprett og før anskaffelsesprotokoll"
+          description: "Det skal føres protokoll for alle anskaffelser over 100.000 kr. Bruk mal: {link_protokoll}"
+          template: { name: "Protokoll for anskaffelse uten kunngjøring", id: "999-4" }
+    phase_3:
+      title: "Fase 3: Kontrakt"
+      steps:
+        contract:
+          number: 5
+          title: "Utarbeid og send kontrakt/bestillingsbrev"
+          description_over_500k: "For anskaffelser over 500.000 skal kontrakt benyttes."
+          requirements:
+            - "Innhent skatteattest fra valgt leverandør (ikke eldre enn 6 mnd)"
+            - "Sørg for at kontrakt inkluderer alle identifiserte krav"
+            - "Få kontrakt godkjent av juridisk avdeling ved behov"
+          description_under_500k: "Et signert bestillingsbrev er tilstrekkelig."
+
+  # ==============================================================
+  # SCENARIO C: ANSKAFFELSE FALLER UTENFOR ANSKAFFELSESREGELVERKET
+  # ==============================================================
+  simplified_guidance:
+    intro: "For anskaffelser under 100.000 kr gjelder forenklede regler. Her er de viktigste punktene:"
+    steps:
+      - "**Kontroller rammeavtaler først**: Selv for småkjøp, sjekk alltid om behovet er dekket av en eksisterende [rammeavtale](https://obfintranett-oslokommune.msappproxy.net/fagstotte/innkjop/rammeavtaler-i-oslobygg/) eller [samkjøpsavtale](https://felles.intranett.oslo.kommune.no/anskaffelser-og-samkjopsavtaler/samkjopsavtaler/). Dette kan spare deg for tid og sikre bedre betingelser."
+      - "**Vurder din habilitet**: Habilitetsreglene gjelder for alle anskaffelser, uavhengig av verdi."
+      - "**Dokumenter kjøpet**: Sørg for at bestillingen (f.eks. e-post eller bestillingsbrev) arkiveres i henhold til gjeldende rutiner for sporbarhet."
+    notes_title: "*Merk:*"
+    notes:
+      - "Protokoll er ikke påkrevd."
+      - "Formell kontrakt er ikke påkrevd, men en skriftlig bestilling anbefales."

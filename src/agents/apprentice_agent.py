@@ -38,7 +38,6 @@ class ApprenticeAgent:
         if not self.config:
             raise ValueError("Konfigurasjon for 'apprentice_agent_config' mangler.")
         
-        # Laster data for både hovedprogramområder og spesifikke fag
         self.udir_data_main_programs = self._load_udir_data(main_programs_only=True)
         self.udir_data_specific_trades = self._load_udir_data(main_programs_only=False)
         
@@ -48,19 +47,14 @@ class ApprenticeAgent:
         if not self.requirement_v_template:
             logger.warning("Krav-definisjon 'V' (lærlinger) ikke funnet i kunnskapsbasen.")
 
-        # Initialiser LLMGateway hvis den er aktivert
         self.llm_gateway: Optional[LLMGateway] = None
         self.llm_config = self.config.get('llm', {})
         
         if self.llm_config.get('enabled'):
             try:
-                # Import LLMGateway
-                from src.services.llm_gateway import LLMGateway
-                
-                # Initialiser LLM Gateway (bruker default config/llm_config.yaml)
+                # --- KORREKSJON: Kallet til LLMGateway() er nå gyldig ---
                 self.llm_gateway = LLMGateway()
                 
-                # Hent prompt fra konfigurasjon (oslomodell_config.yaml)
                 self.extract_trades_prompt = self.llm_config.get('prompt_extract_trades', '')
                 
                 if not self.extract_trades_prompt:
@@ -72,7 +66,6 @@ class ApprenticeAgent:
                 self.llm_gateway = None
                 self.extract_trades_prompt = ''
         else:
-            # LLM er ikke aktivert, sett prompt til tom streng
             self.extract_trades_prompt = ''
             logger.info("ApprenticeAgent: LLM disabled, using keyword-based trade detection")
 
@@ -190,12 +183,17 @@ class ApprenticeAgent:
     def _get_trades_with_special_need(self, trades: List[str]) -> List[str]:
         """Gitt en liste med fag, returner de som har et 'særlig behov'."""
         trades_with_need = []
-        for trade in trades:
-            if trade in self.udir_data_specific_trades:
-                andel = self.udir_data_specific_trades[trade]
-                if andel < self.config['special_need_threshold']:
-                    trades_with_need.append(trade)
-        return trades_with_need
+        # Gå gjennom de rene fagnavnene fra LLM
+        for llm_trade_name in trades:
+            # Gå gjennom de fulle fagnavnene (med kode) fra UDIR-dataen
+            for udir_full_name, andel in self.udir_data_specific_trades.items():
+                # Sjekk om det rene navnet finnes i det fulle navnet OG om andelen er under terskelen
+                if llm_trade_name in udir_full_name and andel < self.config['special_need_threshold']:
+                    # Legg til det FULLE navnet for konsistens
+                    trades_with_need.append(udir_full_name)
+                    # Gå til neste LLM-fag for å unngå duplikater hvis flere treff
+                    break 
+        return list(set(trades_with_need)) # Bruk set() for å sikre unike verdier
 
     def _check_proportionality(self, description: str) -> (bool, str):
         """

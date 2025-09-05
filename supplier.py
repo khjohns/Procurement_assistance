@@ -68,19 +68,30 @@ async def handle_interactive_verification(
     
     # Vis det endelige resultatet fra OBS-sjekken
     print("\n--- RESULTAT FRA OBS-LISTE ---")
-    print(obs_agent.format_result_for_display(final_result_to_check))
+    print(f"Status: {final_result_to_check.status.value}")
+    print(f"Melding: {final_result_to_check.message}")
+    if final_result_to_check.metadata:
+        print("Metadata:")
+        for key, value in final_result_to_check.metadata.items():
+            print(f"  - {key.capitalize()}: {value}")
 
     # Fortsett KUN hvis den endelige statusen er OK
     if final_result_to_check.status == VerificationStatus.OK:
+        # --- FORENKLET LOGIKK HER ---
         org_nr = final_result_to_check.metadata.get('organisasjonsnummer')
-        name = final_result_to_check.metadata.get('navn')
+        official_name = final_result_to_check.metadata.get('navn')
         
+        if not org_nr or not official_name:
+            print("❌ FEIL: Kunne ikke hente organisasjonsnummer eller navn fra verifiseringen.")
+            return
+
         print("\n" + "="*50)
-        print(f"📊 OBS-sjekk OK. Genererer full selskapsrapport for '{name}'...")
+        print(f"📊 OBS-sjekk OK. Genererer full selskapsrapport for '{official_name}'...")
         print("="*50)
         
         try:
-            report = await report_tool.generate_report(orgnr=org_nr, official_name=name)
+            # Bruk det offisielle navnet i rapporten
+            report = await report_tool.generate_report(orgnr=org_nr, official_name=official_name)
             print(report)
         except Exception as e:
             log.error("Klarte ikke å generere selskapsrapport", error=str(e), exc_info=True)
@@ -107,7 +118,7 @@ async def main():
         )
         
         # Initialiser OBS-agent
-        obs_agent = ObsListAgent(brreg_service, "data/OBS_listen.csv")
+        obs_agent = ObsListAgent(brreg_service, "data/OBS_listen.csv", config) # NB! Må legge til config
         
         # Initialiser analyse- og rapportverktøy
         analyzer = CompanyAnalyzer(config.get("company_analyzer_config", {}))

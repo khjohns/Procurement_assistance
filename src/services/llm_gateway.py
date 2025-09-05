@@ -12,6 +12,10 @@ from dataclasses import dataclass
 from pydantic import BaseModel, ValidationError
 from enum import Enum
 
+from ..utils.csv_manager import CSVManager
+from datetime import datetime, timezone
+import uuid
+
 logger = structlog.get_logger()
 
 Purpose = Literal["fast_evaluation", "complex_reasoning", "cost_efficient", "deep_thinking", "default"]
@@ -71,15 +75,19 @@ class LLMStructuredResponseError(Exception):
         self.faulty_json = faulty_json
 
 class LLMGateway:
-    def __init__(self, config_path: str = "config/llm_config.yaml"):
+    def __init__(self, config_path: str = "config/llm_config.yaml", csv_manager: Optional[CSVManager] = None):
         """
         Initialize the LLM Gateway with configuration from YAML file.
         
         Args:
             config_path: Path to the configuration YAML file
+            csv_manager: Optional instance of CSVManager for logging.
         """
         # Load configuration
         self.config = self._load_config(config_path)
+        
+        # --- NYTT: Lagre csv_manager ---
+        self.csv_manager = csv_manager
         
         # Initialize client
         self._init_client()
@@ -131,7 +139,8 @@ class LLMGateway:
             "LLMGateway initialized",
             models=list(self.model_map.keys()),
             max_concurrent=self.max_concurrent_requests,
-            rate_limit=self.rate_limit_per_minute
+            rate_limit=self.rate_limit_per_minute,
+            csv_logging_enabled=bool(self.csv_manager)
         )
     
     def _load_config(self, config_path: str) -> Dict[str, Any]:
@@ -413,7 +422,7 @@ class LLMGateway:
             # Record this request
             self.request_times.append(now)
     
-    async def generate(self, prompt: str, purpose: Purpose = "default", **kwargs) -> str:
+    async def generate(self, prompt: str, purpose: Purpose = "default", **kwargs) -> Tuple[str, Any]:
         """Generate text response using Google GenAI SDK."""
         config = self.purpose_config.get(purpose, self.purpose_config["default"])
         model_name = kwargs.get("model_override") or self.model_map.get(purpose, self.model_map["default"])
@@ -482,7 +491,7 @@ class LLMGateway:
                 else:
                     self.metrics.record_call(True)
                 
-                return response.text
+                return response.text, response
                 
             except asyncio.TimeoutError:
                 logger.warning(
@@ -493,7 +502,7 @@ class LLMGateway:
                 )
                 if attempt == config["max_retries"]:
                     self.metrics.record_call(False)
-                    return json.dumps({"error": "Request timeout", "details": f"Timeout after {config['timeout_seconds']} seconds"})
+                    return json.dumps({"error": "Request timeout", "details": f"Timeout after {config['timeout_seconds']} seconds"}), None
                     
             except Exception as e:
                 wait_time = 2 ** attempt
@@ -506,10 +515,10 @@ class LLMGateway:
                 )
                 if attempt == config["max_retries"]:
                     self.metrics.record_call(False)
-                    return json.dumps({"error": "Max retries exceeded", "details": str(e)})
+                    return json.dumps({"error": "Max retries exceeded", "details": str(e)}), None
                 await asyncio.sleep(wait_time)
         
-        return json.dumps({"error": "Max retries exceeded"})
+        return json.dumps({"error": "Max retries exceeded"}), None
     
     async def generate_structured(
         self,
@@ -517,7 +526,7 @@ class LLMGateway:
         response_schema: Union[Type[BaseModel], Dict[str, Any]],
         purpose: Purpose = "default",
         **kwargs
-    ) -> Dict[str, Any]:
+    ) -> Tuple[Dict[str, Any], Any]: # <--- ENDRING 1
         """
         Generates a structured response using JSON mode.
         """
@@ -622,7 +631,7 @@ class LLMGateway:
                         else:
                             self.metrics.record_call(True)
                         
-                        return validated_data.model_dump()
+                        return validated_data.model_dump(), response # <--- ENDRING 2
                     except ValidationError as e:
                         logger.warning(
                             "Pydantic validation failed",
@@ -648,7 +657,7 @@ class LLMGateway:
                     else:
                         self.metrics.record_call(True)
                     
-                    return parsed_json
+                    return parsed_json, response # <--- ENDRING 3
                     
             except asyncio.TimeoutError:
                 logger.warning(
@@ -733,7 +742,9 @@ class LLMGateway:
         self,
         requests: List[ParallelRequest],
         mode: ConcurrencyMode = None,
-        progress_callback: Optional[callable] = None
+        progress_callback: Optional[callable] = None,
+        procurement_id: Optional[str] = None,
+        assessment_id: Optional[str] = None
     ) -> List[ParallelResponse]:
         """Process multiple requests with specified concurrency mode."""
         if mode is None:
@@ -751,7 +762,7 @@ class LLMGateway:
         elif mode == ConcurrencyMode.SEQUENTIAL:
             return await self._process_sequential(requests, progress_callback)
         else:  # PARALLEL
-            return await self._process_parallel(requests, progress_callback)
+            return await self._process_parallel(requests, progress_callback, procurement_id, assessment_id)
     
     async def _process_sequential(
         self,
@@ -782,20 +793,28 @@ class LLMGateway:
     async def _process_parallel(
         self,
         requests: List[ParallelRequest],
-        progress_callback: Optional[callable] = None
+        progress_callback: Optional[callable] = None,
+        procurement_id: Optional[str] = None, # <--- Må legges til her også
+        assessment_id: Optional[str] = None   # <--- Må legges til her også
     ) -> List[ParallelResponse]:
         """Process requests in parallel with semaphore control."""
-        async def process_with_semaphore(request: ParallelRequest) -> ParallelResponse:
+        # --- KORREKSJON: Send ID-er inn i den indre funksjonen ---
+        async def process_with_semaphore(
+            request: ParallelRequest, 
+            p_id: Optional[str], 
+            a_id: Optional[str]
+        ) -> ParallelResponse:
             async with self.semaphore:
-                return await self._process_single_request(request)
+                return await self._process_single_request(request, p_id, a_id)
         
-        # Create all tasks
+        # Lag alle tasks og send med ID-ene
         tasks = [
-            asyncio.create_task(process_with_semaphore(req))
+            asyncio.create_task(process_with_semaphore(req, procurement_id, assessment_id))
             for req in requests
         ]
+        # --- SLUTT KORREKSJON ---
         
-        # Wait for all tasks with progress updates
+        # Resten av metoden er uendret
         responses = []
         completed = 0
         total = len(tasks)
@@ -818,23 +837,45 @@ class LLMGateway:
         
         return responses
     
-    async def _process_single_request(self, request: ParallelRequest) -> ParallelResponse:
-        """Process a single request and return ParallelResponse."""
+    async def _process_single_request(
+        self,
+        request: ParallelRequest,
+        procurement_id: Optional[str] = None,
+        assessment_id: Optional[str] = None
+    ) -> ParallelResponse:
+        """Process a single request, log the results, and return ParallelResponse."""
+        response_obj = None
         try:
+            result = None
+            model_name = self.model_map.get(request.purpose, self.model_map["default"])
+
             if request.response_schema:
-                result = await self.generate_structured(
+                # Kall den eksisterende metoden som returnerer en tuple
+                result, response_obj = await self.generate_structured(
                     prompt=request.prompt,
                     response_schema=request.response_schema,
                     purpose=request.purpose,
                     **request.kwargs
                 )
             else:
-                result = await self.generate(
+                # Kall den eksisterende metoden som returnerer en tuple
+                result, response_obj = await self.generate(
                     prompt=request.prompt,
                     purpose=request.purpose,
                     **request.kwargs
                 )
             
+            # ### NY LOGIKK: Logg etter vellykket kall ###
+            if response_obj:
+                self._log_llm_call(
+                    procurement_id=procurement_id,
+                    assessment_id=assessment_id,
+                    agent_name=request.id, # request.id er f.eks. "menneskerettigheter-og-folkerett"
+                    model_name=model_name,
+                    purpose=request.purpose,
+                    response=response_obj
+                )
+
             return ParallelResponse(
                 id=request.id,
                 success=True,
@@ -850,116 +891,21 @@ class LLMGateway:
                 request_id=request.id,
                 error=str(e)
             )
+            # ### NY LOGIKK: Logg også ved feil, hvis vi har respons-objektet ###
+            if response_obj:
+                self._log_llm_call(
+                    procurement_id=procurement_id,
+                    assessment_id=assessment_id,
+                    agent_name=request.id,
+                    model_name=self.model_map.get(request.purpose, self.model_map["default"]),
+                    purpose=request.purpose,
+                    response=response_obj
+                )
             return ParallelResponse(
                 id=request.id,
                 success=False,
                 error=str(e)
             )
-    
-    async def _process_batch_mode(self, requests: List[ParallelRequest]) -> List[ParallelResponse]:
-        """Process requests using Gemini Batch API for cost savings (50% off)."""
-        if not self.batch_config.get('enabled', True):
-            logger.warning("Batch mode is disabled in configuration, falling back to parallel mode")
-            return await self._process_parallel(requests)
-        
-        log = logger.bind(batch_size=len(requests))
-        log.info("preparing_batch_job")
-        
-        # Convert requests to batch format
-        batch_requests = []
-        for req in requests:
-            batch_req = {
-                "key": req.id,
-                "request": {
-                    "contents": [{"parts": [{"text": req.prompt}]}]
-                }
-            }
-            
-            # Add generation config if needed
-            if req.kwargs:
-                gen_config = {}
-                if "temperature" in req.kwargs:
-                    gen_config["temperature"] = req.kwargs["temperature"]
-                if "max_output_tokens" in req.kwargs:
-                    gen_config["max_output_tokens"] = req.kwargs["max_output_tokens"]
-                if gen_config:
-                    batch_req["request"]["generation_config"] = gen_config
-            
-            batch_requests.append(batch_req)
-        
-        try:
-            # Submit batch job
-            model_name = self.model_map.get(requests[0].purpose, self.model_map["default"])
-            job_name = f"{self.batch_config.get('job_name_prefix', 'batch')}_{asyncio.get_event_loop().time()}"
-            
-            batch_job = self.client.batches.create(
-                model=model_name,
-                src=batch_requests,  # Inline requests
-                config={'display_name': job_name}
-            )
-            
-            log.info("batch_job_created", job_name=batch_job.name)
-            
-            # Wait for completion
-            completed_states = {
-                'JOB_STATE_SUCCEEDED',
-                'JOB_STATE_FAILED',
-                'JOB_STATE_CANCELLED',
-                'JOB_STATE_PAUSED'
-            }
-            
-            max_wait_hours = self.batch_config.get('max_wait_hours', 24)
-            check_interval = self.batch_config.get('status_check_interval', 30)
-            max_checks = (max_wait_hours * 3600) // check_interval
-            
-            for check_num in range(max_checks):
-                await asyncio.sleep(check_interval)
-                job = self.client.batches.get(name=batch_job.name)
-                
-                if job.state in completed_states:
-                    break
-                
-                log.debug(
-                    "batch_job_status",
-                    job_state=job.state,
-                    check_number=check_num + 1
-                )
-            
-            # Process results
-            if job.state == 'JOB_STATE_SUCCEEDED':
-                results = job.inline_response if hasattr(job, 'inline_response') else []
-                
-                responses = []
-                for req, result in zip(requests, results):
-                    try:
-                        response_text = result.response.candidates[0].content.parts[0].text
-                        responses.append(ParallelResponse(
-                            id=req.id,
-                            success=True,
-                            result=response_text
-                        ))
-                    except Exception as e:
-                        responses.append(ParallelResponse(
-                            id=req.id,
-                            success=False,
-                            error=f"Failed to parse batch result: {str(e)}"
-                        ))
-                
-                return responses
-            else:
-                error_msg = f"Batch job failed with state: {job.state}"
-                log.error("batch_job_failed", job_state=job.state)
-                return [
-                    ParallelResponse(id=req.id, success=False, error=error_msg)
-                    for req in requests
-                ]
-                
-        except Exception as e:
-            log.error("batch_processing_error", error=str(e))
-            return [
-                ParallelResponse(id=req.id, success=False, error=str(e))
-                for req in requests
-            ]
     
     def get_metrics(self) -> Dict[str, Any]:
         """Get usage metrics for the gateway."""
@@ -978,3 +924,77 @@ class LLMGateway:
             "total_output_tokens": self.metrics.total_tokens_output,
             "estimated_cost_usd": round(self.metrics.total_cost_usd, 6)
         }
+
+    def _log_llm_call(
+        self,
+        *,
+        procurement_id: str,
+        assessment_id: Optional[str],
+        agent_name: str,
+        model_name: str,
+        purpose: str,
+        response: Any,
+    ):
+        """
+        Sentralisert metode for å logge kostnader og tanker fra et LLM-kall til CSV.
+        Denne metoden er designet for å være robust og ikke krasje hovedflyten.
+        """
+        if not self.csv_manager or not procurement_id:
+            return
+
+        try:
+            # --- 1. Logg kostnader ---
+            usage = getattr(response, "usage_metadata", None)
+            if usage:
+                input_tokens = getattr(usage, "prompt_token_count", 0)
+                output_tokens = getattr(usage, "candidates_token_count", 0)
+                total_tokens = getattr(usage, "total_token_count", input_tokens + output_tokens)
+
+                cost_record = {
+                    "cost_id": f"C-{uuid.uuid4().hex[:8]}",
+                    "procurement_id": procurement_id,
+                    "assessment_id": assessment_id,
+                    "agent_name": agent_name,
+                    "model": model_name,
+                    "purpose": purpose,
+                    "input_tokens": input_tokens,
+                    "output_tokens": output_tokens,
+                    "total_tokens": total_tokens,
+                    "estimated_cost_usd": self._calculate_cost(model_name, input_tokens, output_tokens),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                }
+                self.csv_manager.append_row("llm_costs", cost_record)
+
+            # --- 2. Logg tanker (thoughts) ---
+            all_thoughts_text = []
+            if hasattr(response, "candidates") and response.candidates:
+                candidate = response.candidates[0]
+                if hasattr(candidate, "content") and hasattr(candidate.content, "parts"):
+                    for part in candidate.content.parts:
+                        # KORREKSJON: Hent part.text NÅR part.thought er True
+                        if hasattr(part, "thought") and part.thought and hasattr(part, "text"):
+                            all_thoughts_text.append(part.text)
+
+            if all_thoughts_text:
+                # Slå sammen alle tankene til en enkelt tekstblokk for logging
+                thought_content = "\n\n--- Thought ---\n\n".join(all_thoughts_text)
+                
+                thought_record = {
+                    "thought_id": f"T-{uuid.uuid4().hex[:8]}",
+                    "procurement_id": procurement_id,
+                    "assessment_id": assessment_id,
+                    "agent_name": agent_name,
+                    "thought_content": thought_content,
+                    "model": model_name,
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                }
+                self.csv_manager.append_row("llm_thoughts", thought_record)
+
+        except Exception as e:
+            logger.error(
+                "csv_logging_failed_for_llm_call",
+                procurement_id=procurement_id,
+                agent_name=agent_name,
+                error=str(e),
+                exc_info=True,
+            )
